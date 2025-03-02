@@ -1,0 +1,17 @@
+fileFormatVersion: 2
+guid: 1b2f800bb8df6b842a2d1d4609907077
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences:
+  - Idle: {instanceID: 0}
+  - Attacking: {instanceID: 0}
+  - Fleeing: {instanceID: 0}
+  - Winning: {instanceID: 0}
+  - Losing: {instanceID: 0}
+  - Dead: {instanceID: 0}
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
