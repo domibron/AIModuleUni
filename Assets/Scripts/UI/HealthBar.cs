@@ -5,13 +5,13 @@ using UnityEngine.UI;
 /// Updates the health bar for the AI agent, all UI elements store a reference to the
 /// object they are representing and are updated by OnGUI events
 /// </summary>
-public class HealthBarUpdate : MonoBehaviour
+public class HealthBar : MonoBehaviour
 {
     private Slider _healthBar;
     private AgentData _agentData;
 
     // Use this for initialization
-    void Start ()
+    void Start()
     {
         _agentData = GetComponentInParent<AgentData>();
         _healthBar = GetComponent<Slider>();

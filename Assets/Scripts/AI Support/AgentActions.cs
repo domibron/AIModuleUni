@@ -2,6 +2,7 @@
 using System;
 using System.Linq;
 using System.Collections;
+using UnityEngine.AI;
 
 /// <summary>
 /// This class provides an interface for all the actions the AI agent can take in the world
@@ -24,7 +25,7 @@ public class AgentActions : MonoBehaviour
     // gives access to the agents inventory
     private InventoryController _agentInventory;
 
-    private UnityEngine.AI.NavMeshAgent _navAgent;
+    private NavMeshAgent _navAgent;
     private Animator _swordAnimator;
     // A flag to ensure we don't try to run multiple damage coroutines at once
     private bool IsAttacking = false;
@@ -36,17 +37,21 @@ public class AgentActions : MonoBehaviour
         get { return _agentMoodIndicator; }
     }
 
+    #region Start
     // Use this for initialization, get references to all the component scripts we'll need
     void Start()
     {
         _agentData = GetComponent<AgentData>();
         _agentSenses = GetComponentInChildren<Sensing>();
         _agentInventory = GetComponentInChildren<InventoryController>();
-        _navAgent = GetComponent<UnityEngine.AI.NavMeshAgent>();
+        _navAgent = GetComponent<NavMeshAgent>();
         _swordAnimator = GetComponentInChildren<Animator>();
         _agentMoodIndicator = GetComponentInChildren<AiMoodIconController>();
     }
+    #endregion
 
+
+    #region PointInsideSphere
     /// <summary>
     /// Utility method to test for we are within a specific distance from a location
     /// </summary>
@@ -58,7 +63,11 @@ public class AgentActions : MonoBehaviour
     {
         return Vector3.Distance(point, center) < radius;
     }
+    #endregion
 
+
+
+    #region TestDestination
     /// <summary>
     /// Utility method to test for a valid destination on the navmesh
     /// </summary>
@@ -78,7 +87,11 @@ public class AgentActions : MonoBehaviour
         destination = Vector3.zero;
         return false;
     }
+    #endregion
 
+
+
+    #region GetRandomDestination
     /// <summary>
     /// Utility method to find a random location on the navmesh
     /// </summary>
@@ -100,7 +113,11 @@ public class AgentActions : MonoBehaviour
 
         return Vector3.zero;
     }
+    #endregion
 
+
+
+    #region MoveTo
     /// <summary>
     /// Move towards the position of the target object
     /// </summary>
@@ -120,7 +137,11 @@ public class AgentActions : MonoBehaviour
         }
         return false;
     }
+    #endregion
 
+
+
+    #region MoveTo
     /// <summary>
     /// Move towards a target location
     /// </summary>
@@ -138,7 +159,11 @@ public class AgentActions : MonoBehaviour
 
         return false;
     }
+    #endregion
 
+
+
+    #region MoveToRandomLocation
     /// <summary>
     /// Move to a random location
     /// </summary>
@@ -150,7 +175,11 @@ public class AgentActions : MonoBehaviour
             _navAgent.destination = GetRandomDestination(MaxRandomDestinationRange);
         }
     }
+    #endregion
 
+
+
+    #region Stop
     /// <summary>
     /// Stop moving
     /// </summary>
@@ -159,7 +188,11 @@ public class AgentActions : MonoBehaviour
         // setting destination to current position stops the AI moving
         _navAgent.destination = transform.position;
     }
+    #endregion
 
+
+
+    #region CollectItem
     /// <summary>
     /// Pick up a collectable item and put it in the inventory
     /// A collected item is no longer visible to other AIs with the exception of the flag
@@ -180,7 +213,11 @@ public class AgentActions : MonoBehaviour
             }
         }
     }
+    #endregion
 
+
+
+    #region UseItem
     /// <summary>
     /// Use an item stored in the inventory if it is stored there
     /// </summary>
@@ -198,7 +235,11 @@ public class AgentActions : MonoBehaviour
             }
         }
     }
+    #endregion
 
+
+
+    #region DropItem
     /// <summary>
     /// Drop an item stored in the inventory onto the ground
     /// A dropped item becomes visible and collectable
@@ -206,26 +247,30 @@ public class AgentActions : MonoBehaviour
     /// <param name="item">The item to drop</param>
     public void DropItem(GameObject item)
     {
-            // Check we actually have it and its collectable
-            if (_agentInventory.HasItem(item.name) && item.GetComponent<Collectable>() != null)
+        // Check we actually have it and its collectable
+        if (_agentInventory.HasItem(item.name) && item.GetComponent<Collectable>() != null)
+        {
+            // Check just in front of us that we're not dropping inside an obstacle
+            Vector3 targetPoint = gameObject.transform.position + gameObject.transform.forward;
+            // Make sure we're testing a position on the ground
+            targetPoint.y = 1.0f;
+
+            Vector3 dropPosition;
+            if (TestDestination(targetPoint, out dropPosition))
             {
-                // Check just in front of us that we're not dropping inside an obstacle
-                Vector3 targetPoint = gameObject.transform.position + gameObject.transform.forward;
-                // Make sure we're testing a position on the ground
-                targetPoint.y = 1.0f;
+                // Make sure we keep the original y position of the item
+                dropPosition.y = item.transform.position.y;
+                _agentInventory.RemoveItem(item.name);
 
-                Vector3 dropPosition;
-                if (TestDestination(targetPoint, out dropPosition))
-                {
-                    // Make sure we keep the original y position of the item
-                    dropPosition.y = item.transform.position.y;
-                    _agentInventory.RemoveItem(item.name);
-
-                    item.GetComponent<Collectable>().Drop(_agentData, dropPosition);
-                }
+                item.GetComponent<Collectable>().Drop(_agentData, dropPosition);
             }
+        }
     }
+    #endregion
 
+
+
+    #region DropAllItems
     /// <summary>
     /// Drop every item in the inventory
     /// </summary>
@@ -244,7 +289,11 @@ public class AgentActions : MonoBehaviour
             }
         }
     }
+    #endregion
 
+
+
+    #region DoAttack
     private IEnumerator DoAttack(GameObject target)
     {
         IsAttacking = true;
@@ -273,7 +322,11 @@ public class AgentActions : MonoBehaviour
 
         IsAttacking = false;
     }
+    #endregion
 
+
+
+    #region AttackEnemy
     /// <summary>
     /// Attack an enemy AI if it is within range, a powerup will increase the damage done
     /// </summary>
@@ -284,7 +337,7 @@ public class AgentActions : MonoBehaviour
         if (target.CompareTag(_agentData.EnemyTeamTag) && IsAttacking == false)
         {
             // Only attack if we're within range
-            if(_agentSenses.IsInAttackRange(target))
+            if (_agentSenses.IsInAttackRange(target))
             {
                 // face the enemy and do the attack
                 this.transform.LookAt(target.transform);
@@ -292,14 +345,18 @@ public class AgentActions : MonoBehaviour
             }
         }
     }
+    #endregion
 
+
+
+    #region Flee
     /// <summary>
     /// Flee from an object by moving in the opposite direction
     /// </summary>
     /// <param name="enemy">The object to flee from (expected to be an enemy AI)</param>
     public void Flee(GameObject enemy)
     {
-        if(enemy != null)
+        if (enemy != null)
         {
             // Turn away from the threat
             transform.rotation = Quaternion.LookRotation(transform.position - enemy.transform.position);
@@ -314,4 +371,5 @@ public class AgentActions : MonoBehaviour
             _navAgent.SetDestination(navHit.position);
         }
     }
+    #endregion
 }

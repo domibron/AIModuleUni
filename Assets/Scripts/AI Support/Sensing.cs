@@ -5,7 +5,7 @@ using UnityEngine;
 
 /// <summary>
 /// Handles the AI agents sensory suite, uses OverlapSphereNonAlloc to detect objects in view range,
-/// provides various access functions to percieved objects with different constraints e.g. only enemies
+/// provides various access functions to Perceived objects with different constraints e.g. only enemies
 /// and access to the list holding all detected objects. Only objects in the 'VisibleToAI' layer are found
 /// by the OverlapSphereNonAlloc. A ray cast is used to determine if a wall, defined by the 'Walls' layer,
 /// obstruct the view.
@@ -22,10 +22,10 @@ public class Sensing : MonoBehaviour
     public LayerMask WallsLayer;
 
     // Keep track of game objects in our visual field
-    private readonly Dictionary<String, GameObject> _objectsPercieved = new Dictionary<String, GameObject>();
-    public Dictionary<String, GameObject> ObjectsPercieved
+    private readonly Dictionary<String, GameObject> _objectsPerceived = new Dictionary<String, GameObject>();
+    public Dictionary<String, GameObject> ObjectsPerceived
     {
-        get { return _objectsPercieved; }
+        get { return _objectsPerceived; }
     }
 
     // Use this for initialization
@@ -40,7 +40,7 @@ public class Sensing : MonoBehaviour
     private List<GameObject> _objectsInView = new List<GameObject>(MaxObjectsInView);
 
     /// <summary>
-    /// This updates the objectsPercievecd list by calling OverlapSphereNonAlloc with the mask selecting only
+    /// This updates the objectsPerceived list by calling OverlapSphereNonAlloc with the mask selecting only
     /// objects the AI should be able to see. this list is filtered further by using a raycast to remove any objects
     /// obstructed by walls, using the WallsLayer layer. This method is called whenever the AI needs information about
     /// objects it can see
@@ -74,7 +74,7 @@ public class Sensing : MonoBehaviour
     /// Return a normalised vector pointing to the target GameObject
     /// </summary>
     /// <param name="target">the GameObject to get a vector to</param>
-    /// <returns>Vector3 representing a normalised vetor pointing at the target</returns>
+    /// <returns>Vector3 representing a normalised vector pointing at the target</returns>
     public Vector3 GetVectorToTarget(GameObject target)
     {
         Vector3 vectorToTarget = target.transform.position - transform.position;
@@ -85,7 +85,7 @@ public class Sensing : MonoBehaviour
     /// Return a normalised vector pointing to the target vector
     /// </summary>
     /// <param name="target">the Vector3 to get a vector to</param>
-    /// <returns>Vector3 representing a normalised vetor pointing at the target</returns>
+    /// <returns>Vector3 representing a normalised vector pointing at the target</returns>
     public Vector3 GetVectorToTarget(Vector3 target)
     {
         Vector3 vectorToTarget = target - transform.position;
@@ -96,7 +96,7 @@ public class Sensing : MonoBehaviour
     /// Return a normalised vector pointing away from the target GameObject
     /// </summary>
     /// <param name="target">the GameObject to get a vector to</param>
-    /// <returns>Vector3 representing a normalised vetor pointing at the target</returns>
+    /// <returns>Vector3 representing a normalised vector pointing at the target</returns>
     public Vector3 GetFleeVectorFromTarget(GameObject target)
     {
         Vector3 vectorToTarget = transform.position - target.transform.position;
@@ -107,7 +107,7 @@ public class Sensing : MonoBehaviour
     /// Return a normalised vector pointing away from the target vector
     /// </summary>
     /// <param name="target">the Vector3 to get a vector to</param>
-    /// <returns>Vector3 representing a normalised vetor pointing at the target</returns>
+    /// <returns>Vector3 representing a normalised vector pointing at the target</returns>
     public Vector3 GetFleeVectorFromTarget(Vector3 target)
     {
         Vector3 vectorToTarget = transform.position - target;
@@ -185,7 +185,7 @@ public class Sensing : MonoBehaviour
     /// <summary>
     /// Returns a list of enemy AI's in view
     /// </summary>
-    /// <returns>List of enemies within viewrange</returns>
+    /// <returns>List of enemies within view range</returns>
     public List<GameObject> GetEnemiesInView()
     {
         UpdateViewedObjectsList();
@@ -202,7 +202,7 @@ public class Sensing : MonoBehaviour
 
         List<GameObject> enemies = GetEnemiesInView();
 
-        if(enemies.Count > 0)
+        if (enemies.Count > 0)
         {
             GameObject closestEnemy = enemies.Aggregate((minItem, nextItem) => Vector3.Distance(minItem.transform.position, transform.position) < Vector3.Distance(nextItem.transform.position, transform.position) ? minItem : nextItem);
             return closestEnemy;
@@ -230,7 +230,7 @@ public class Sensing : MonoBehaviour
     public GameObject GetObjectInViewByName(string nameToSelect)
     {
         UpdateViewedObjectsList();
-        return _objectsInView.SingleOrDefault(x=>x.name.Equals(nameToSelect));
+        return _objectsInView.SingleOrDefault(x => x.name.Equals(nameToSelect));
     }
 
     /// <summary>

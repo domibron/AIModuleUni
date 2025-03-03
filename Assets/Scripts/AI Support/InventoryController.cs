@@ -22,6 +22,9 @@ public class InventoryController : MonoBehaviour
         get { return _inventory; }
     }
 
+
+
+    #region AddItem
     /// <summary>
     /// Adds an item to the inventory if there's enough room (max capacity is 'Constants.InventorySize')
     /// </summary>
@@ -31,7 +34,7 @@ public class InventoryController : MonoBehaviour
     {
         if (_inventory.Count < _Capacity && item.GetComponent<Collectable>() != null)
         {
-            if(!_inventory.ContainsKey(item.name))
+            if (!_inventory.ContainsKey(item.name))
             {
                 _inventory.Add(item.name, item);
                 return true;
@@ -39,7 +42,11 @@ public class InventoryController : MonoBehaviour
         }
         return false;
     }
+    #endregion
 
+
+
+    #region GetItem
     /// <summary>
     /// Retrieves an item from the inventory as a GameObject, does not remove it from the inventory
     /// </summary>
@@ -54,7 +61,11 @@ public class InventoryController : MonoBehaviour
         }
         return null;
     }
+    #endregion
 
+
+
+    #region RemoveItem
     /// <summary>
     /// Removes an item from the inventory
     /// </summary>
@@ -71,7 +82,11 @@ public class InventoryController : MonoBehaviour
 
         return false;
     }
+    #endregion
 
+
+
+    #region HasItem
     /// <summary>
     /// Checks if an item is stored in the inventory
     /// </summary>
@@ -81,4 +96,5 @@ public class InventoryController : MonoBehaviour
     {
         return _inventory.ContainsKey(itemName);
     }
+    #endregion
 }

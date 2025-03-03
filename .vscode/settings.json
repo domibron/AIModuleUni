@@ -51,5 +51,8 @@
         "temp/": true,
         "Temp/": true
     },
-    "dotnet.defaultSolution": "AIModuleUni.sln"
+    "dotnet.defaultSolution": "AIModuleUni.sln",
+    "cSpell.words": [
+        "Mathf"
+    ]
 }

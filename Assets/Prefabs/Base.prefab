@@ -167,7 +167,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d3b85e036cf1a9a4e86c78096057442b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  AiAgentPrefab: {fileID: 1574775215716390, guid: 9a60fe2cb738eec45bb41283efd5c94d, type: 3}
+  AiAgentPrefab: {fileID: 1574775215716390, guid: 9a60fe2cb738eec45bb41283efd5c94d,
+    type: 3}
   RespawnDelay: 5
 --- !u!114 &114867852327969042
 MonoBehaviour:

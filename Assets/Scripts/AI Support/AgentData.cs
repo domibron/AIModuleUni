@@ -5,7 +5,7 @@ using UnityEngine;
 public enum AiMood { Idle, Attacking, Fleeing, Winning, Losing, Dead };
 
 /// <summary>
-/// Stores significant adta about the AI agent, this can also be used to evaluate an enemy AI's strength
+/// Stores significant data about the AI agent, this can also be used to evaluate an enemy AI's strength
 /// A few utility methods are provided which directly affect the AI's internal state e.g. health
 /// </summary>
 public class AgentData : MonoBehaviour
@@ -81,6 +81,7 @@ public class AgentData : MonoBehaviour
         }
     }
 
+    #region Agent stats
     // Agent stats
     public int MaxHitPoints = 100;
     public float AttackRange = 2.0f;
@@ -89,6 +90,7 @@ public class AgentData : MonoBehaviour
     public float PickUpRange = 1.0f;
     public int Speed = 200;
     public int ViewRange = 10;
+    #endregion
 
     // Check for collisions with everything when checking for a random location for the wander function
     public const int AgentLayerMask = -1;
@@ -167,6 +169,9 @@ public class AgentData : MonoBehaviour
         }
     }
 
+
+
+    #region Die
     /// <summary>
     /// We've died, destroy our gameobject
     /// </summary>
@@ -178,7 +183,11 @@ public class AgentData : MonoBehaviour
         actions.DropAllItems();
         Destroy(gameObject);
     }
+    #endregion
 
+
+
+    #region TakeDamage
     /// <summary>
     /// We've been hit and taken some damage
     /// If hit points reach zero we've died
@@ -197,7 +206,11 @@ public class AgentData : MonoBehaviour
             Die();
         }
     }
+    #endregion
 
+
+
+    #region Heal
     /// <summary>
     /// We'ved used a healing potion so heal up
     /// </summary>
@@ -214,7 +227,11 @@ public class AgentData : MonoBehaviour
             CurrentHitPoints += healAmount;
         }
     }
+    #endregion
 
+
+
+    #region PowerUp
     /// <summary>
     /// Set the powerup multiplier amount
     /// </summary>
@@ -223,14 +240,18 @@ public class AgentData : MonoBehaviour
     {
         _powerUp = powerAmount;
     }
+    #endregion
 
+
+
+    #region Start
     // Use this for initialization
-    void Start ()
-    {        
+    void Start()
+    {
         CurrentHitPoints = MaxHitPoints;
 
         // Set all the appropriate parameters for the current team
-        switch(EnemyTeam)
+        switch (EnemyTeam)
         {
             case Teams.BlueTeam:
                 _enemyTeamTag = Tags.BlueTeam;
@@ -255,7 +276,11 @@ public class AgentData : MonoBehaviour
         _friendlyTeamScore = _friendlyBase.GetComponent<SetScore>();
         _enemyTeamScore = _enemyBase.GetComponent<SetScore>();
     }
+    #endregion
 
+
+
+    #region Update
     void Update()
     {
         // TODO: Maybe remove this
@@ -269,4 +294,5 @@ public class AgentData : MonoBehaviour
             _aiMood = AiMood.Idle;
         }
     }
+    #endregion
 }
