@@ -5,7 +5,7 @@ using UnityEngine;
 /// <summary>
 /// Ensure that the AI agents ui is always facing the camera
 /// </summary>
-public class FaceCamera : MonoBehaviour
+public class Billboard : MonoBehaviour
 {
     public Camera CameraToFace;
 

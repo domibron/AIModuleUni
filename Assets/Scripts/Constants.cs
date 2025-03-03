@@ -1,10 +1,9 @@
-﻿using Unity.VisualScripting;
+﻿
 
 /// <summary>
 /// The names used to identify important entities in the game
 /// Names refer to individual GameObjects
 /// </summary>
-[IncludeInSettings(true)]
 public static class Names
 {
     public const string PowerUp = "Power Up";
@@ -29,7 +28,6 @@ public static class Names
 /// The tags used to identify important entity groups in the game
 /// Tags refer to groups of related objects
 /// </summary>
-[IncludeInSettings(true)]
 public static class Tags
 {
     public const string BlueTeam = "Blue Team";
