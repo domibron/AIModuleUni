@@ -10,6 +10,7 @@ public enum AiMood { Idle, Attacking, Fleeing, Winning, Losing, Dead };
 /// </summary>
 public class AgentData : MonoBehaviour
 {
+    #region Teams
     // Allow us to select the team in the Inspector
     public enum Teams
     {
@@ -19,6 +20,9 @@ public class AgentData : MonoBehaviour
     public Teams EnemyTeam;
     public Teams FriendlyTeam;
 
+    #endregion
+
+    #region EnemyTeamTag
     // A tag identifying members of the enemy team
     private string _enemyTeamTag = "";
     public string EnemyTeamTag
@@ -28,7 +32,9 @@ public class AgentData : MonoBehaviour
             return _enemyTeamTag;
         }
     }
+    #endregion
 
+    #region FriendlyFlagName
     // The name identifying the friendly flag
     private string _friendlyFlagName = "";
     public string FriendlyFlagName
@@ -38,7 +44,9 @@ public class AgentData : MonoBehaviour
             return _friendlyFlagName;
         }
     }
+    #endregion
 
+    #region EnemyFlagName
     // The name identifying the enemy flag
     private string _enemyFlagName = "";
     public string EnemyFlagName
@@ -48,7 +56,9 @@ public class AgentData : MonoBehaviour
             return _enemyFlagName;
         }
     }
+    #endregion
 
+    #region FriendlyBase
     /// <summary>
     /// The GameObject representing the friendly base
     /// </summary>
@@ -59,6 +69,9 @@ public class AgentData : MonoBehaviour
         set { _friendlyBase = value; }
     }
 
+    #endregion
+
+    #region EnemyBase
     /// <summary>
     /// The GameObject representing the friendly base
     /// </summary>
@@ -68,7 +81,9 @@ public class AgentData : MonoBehaviour
         get { return _enemyBase; }
         set { _enemyBase = value; }
     }
+    #endregion
 
+    #region FriendlyTeamTag
     /// <summary>
     /// A tag representing members of the friendly team
     /// </summary>
@@ -80,6 +95,7 @@ public class AgentData : MonoBehaviour
             return _friendlyTeamTag;
         }
     }
+    #endregion
 
     #region Agent stats
     // Agent stats
@@ -98,6 +114,7 @@ public class AgentData : MonoBehaviour
     // Our current health, this is public in order to aid debugging
     public int CurrentHitPoints;
 
+    #region FriendlyScore
     /// <summary>
     /// Get the current scores
     /// </summary>
@@ -106,14 +123,17 @@ public class AgentData : MonoBehaviour
     {
         get { return _friendlyTeamScore.Score; }
     }
+    #endregion
 
+    #region EnemyScore
     private SetScore _enemyTeamScore;
     public int EnemyScore
     {
         get { return _enemyTeamScore.Score; }
     }
+    #endregion
 
-
+    #region AiMood
     /// <summary>
     /// Show the current mood of the AI agent
     /// </summary>
@@ -124,6 +144,10 @@ public class AgentData : MonoBehaviour
         set { _aiMood = value; }
     }
 
+    #endregion
+
+
+    #region PowerUpAmount
     /// <summary>
     /// Get the powerup multiplier amount
     /// </summary>
@@ -133,6 +157,10 @@ public class AgentData : MonoBehaviour
         get { return _powerUp; }
     }
 
+    #endregion
+
+
+    #region IsPoweredUp
     /// <summary>
     /// Do we have a powerup?
     /// </summary>
@@ -140,7 +168,10 @@ public class AgentData : MonoBehaviour
     {
         get { return _powerUp > 0; }
     }
+    #endregion
 
+
+    #region HasFriendlyFlag
     /// <summary>
     /// Get the flag carrier status from the inventory
     /// If we have the flag in our inventory we are the carrier
@@ -156,6 +187,9 @@ public class AgentData : MonoBehaviour
             return false;
         }
     }
+    #endregion
+
+    #region HasEnemyFlag
 
     public bool HasEnemyFlag
     {
@@ -169,6 +203,7 @@ public class AgentData : MonoBehaviour
         }
     }
 
+    #endregion
 
 
     #region Die

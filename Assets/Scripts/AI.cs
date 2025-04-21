@@ -84,18 +84,24 @@ using UnityEngine;
 public class AI : MonoBehaviour
 {
     // Gives access to important data about the AI agent (see above)
-    private AgentData _agentData;
+    [HideInInspector] public AgentData _agentData;
     // Gives access to the agent senses
-    private Sensing _agentSenses;
+    [HideInInspector] public Sensing _agentSenses;
     // gives access to the agents inventory
-    private InventoryController _agentInventory;
+    [HideInInspector] public InventoryController _agentInventory;
     // This is the script containing the AI agents actions
     // e.g. agentScript.MoveTo(enemy);
-    private AgentActions _agentActions;
+    [HideInInspector] public AgentActions _agentActions;
 
 
-    // Use this for initialization
-    void Start ()
+    private Utility_AI _UtilAI = new Utility_AI();
+
+    public Utility_AI UtilAI
+    {
+        get { return _UtilAI; }
+    }
+
+    void Awake()
     {
         // Initialise the accessable script components
         _agentData = GetComponent<AgentData>();
@@ -103,12 +109,31 @@ public class AI : MonoBehaviour
         _agentSenses = GetComponentInChildren<Sensing>();
         _agentInventory = GetComponentInChildren<InventoryController>();
 
+        _UtilAI.AddGoal(new Goal(GoalLabels.Health, _agentData.CurrentHitPoints, 0, _agentData.MaxHitPoints, CurveFunctions.Linear));
+        // _UtilAI.AddGoal(new Goal(GoalLabels.Fear, 0, 0, 10, CurveFunctions.Linear));
+        // _UtilAI.AddGoal(new Goal(GoalLabels.Aggression, 0, 0, 10, CurveFunctions.Linear));
+        // _UtilAI.AddGoal(new Goal(GoalLabels.AttackObjective, 0, 0, 1, CurveFunctions.Linear));
+        // _UtilAI.AddGoal(new Goal(GoalLabels.DefendObjective, 0, 0, 1, CurveFunctions.Linear));
+
+        HealSelf healSelf = new HealSelf(this);
+        healSelf.SetGoalSatisfactionValue(GoalLabels.Health, 50);
+        healSelf.SetGoalSatisfactionValue(GoalLabels.Fear, 5);
+
+        _UtilAI.AddAction(healSelf);
+    }
+
+    // Use this for initialization
+    void Start()
+    {
+
+
+
     }
 
     // Update is called once per frame
-    void Update ()
+    void Update()
     {
         // Run your AI code in here
-
+        _UtilAI.ChooseAction(this).Execute(Time.deltaTime);
     }
 }
