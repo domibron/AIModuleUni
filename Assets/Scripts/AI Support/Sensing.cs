@@ -28,12 +28,15 @@ public class Sensing : MonoBehaviour
         get { return _objectsPerceived; }
     }
 
+    #region Start
     // Use this for initialization
     void Start()
     {
         _agentData = GetComponentInParent<AgentData>();
     }
+    #endregion
 
+    #region UpdateViewedObjectsList
     // _overlapResults is returned by the sphere overlap function
     private Collider[] _overlapResults = new Collider[MaxObjectsInView];
     // _objects in view is the list of objects not obstructed (and not ourself)
@@ -70,6 +73,11 @@ public class Sensing : MonoBehaviour
         }
     }
 
+    #endregion
+
+
+    #region GetVectorToTarget
+
     /// <summary>
     /// Return a normalised vector pointing to the target GameObject
     /// </summary>
@@ -80,6 +88,11 @@ public class Sensing : MonoBehaviour
         Vector3 vectorToTarget = target.transform.position - transform.position;
         return vectorToTarget.normalized;
     }
+
+    #endregion
+
+
+    #region GetVectorToTarget
 
     /// <summary>
     /// Return a normalised vector pointing to the target vector
@@ -92,6 +105,11 @@ public class Sensing : MonoBehaviour
         return vectorToTarget.normalized;
     }
 
+    #endregion
+
+
+    #region GetFleeVectorFromTarget
+
     /// <summary>
     /// Return a normalised vector pointing away from the target GameObject
     /// </summary>
@@ -102,6 +120,10 @@ public class Sensing : MonoBehaviour
         Vector3 vectorToTarget = transform.position - target.transform.position;
         return vectorToTarget.normalized;
     }
+
+    #endregion
+
+    #region GetFleeVectorFromTarget
 
     /// <summary>
     /// Return a normalised vector pointing away from the target vector
@@ -114,6 +136,11 @@ public class Sensing : MonoBehaviour
         return vectorToTarget.normalized;
     }
 
+    #endregion
+
+
+    #region GetObjectsInView
+
     /// <summary>
     /// Return a list of all the objects the AI can see
     /// </summary>
@@ -124,6 +151,11 @@ public class Sensing : MonoBehaviour
         return _objectsInView;
     }
 
+    #endregion
+
+
+    #region GetCollectablesInView
+
     /// <summary>
     /// Returns a list of all the collectable objects in view
     /// </summary>
@@ -133,6 +165,11 @@ public class Sensing : MonoBehaviour
         UpdateViewedObjectsList();
         return _objectsInView.Where(x => x.CompareTag(Tags.Collectable)).ToList();
     }
+
+    #endregion
+
+
+    #region GetNearestCollectableInView
 
     /// <summary>
     /// Returns the nearest collectable in view to the agent
@@ -153,6 +190,10 @@ public class Sensing : MonoBehaviour
         return null;
     }
 
+    #endregion
+
+    #region GetFriendliesInView
+
     /// <summary>
     /// Returns a list of friendly AI's in view
     /// </summary>
@@ -162,6 +203,11 @@ public class Sensing : MonoBehaviour
         UpdateViewedObjectsList();
         return _objectsInView.Where(x => x.CompareTag(_agentData.FriendlyTeamTag)).ToList();
     }
+
+    #endregion
+
+
+    #region GetNearestFriendlyInView
 
     /// <summary>
     /// Returns the nearest friendly AI's in view to the agent
@@ -182,6 +228,10 @@ public class Sensing : MonoBehaviour
         return null;
     }
 
+    #endregion
+
+    #region GetEnemiesInView
+
     /// <summary>
     /// Returns a list of enemy AI's in view
     /// </summary>
@@ -191,6 +241,10 @@ public class Sensing : MonoBehaviour
         UpdateViewedObjectsList();
         return _objectsInView.Where(x => x.CompareTag(_agentData.EnemyTeamTag)).ToList();
     }
+
+    #endregion
+
+    #region GetNearestEnemyInView
 
     /// <summary>
     /// Returns the nearest enemy AI's in view to the agent
@@ -211,6 +265,10 @@ public class Sensing : MonoBehaviour
         return null;
     }
 
+    #endregion
+
+    #region GetObjectsInViewByTag
+
     /// <summary>
     /// Returns a list of object with a specific tag in view
     /// </summary>
@@ -222,6 +280,11 @@ public class Sensing : MonoBehaviour
         return _objectsInView.Where(x => x.CompareTag(tagToSelect)).ToList();
     }
 
+    #endregion
+
+
+    #region GetObjectInViewByName
+
     /// <summary>
     /// Returns an object with a specific name
     /// </summary>
@@ -232,6 +295,10 @@ public class Sensing : MonoBehaviour
         UpdateViewedObjectsList();
         return _objectsInView.SingleOrDefault(x => x.name.Equals(nameToSelect));
     }
+
+    #endregion
+
+    #region IsItemInReach
 
     /// <summary>
     /// Check if a GameObject is within the AI agents reach
@@ -251,6 +318,10 @@ public class Sensing : MonoBehaviour
         return false;
     }
 
+    #endregion
+
+    #region IsInAttackRange
+
     /// <summary>
     /// Check if we're with attacking range of a specific enemy AI
     /// </summary>
@@ -267,4 +338,6 @@ public class Sensing : MonoBehaviour
         }
         return false;
     }
+
+    #endregion
 }

@@ -662,10 +662,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   VisibleToAiMask:
     serializedVersion: 2
-    m_Bits: 256
+    m_Bits: 0
   WallsLayer:
     serializedVersion: 2
-    m_Bits: 512
+    m_Bits: 0
 --- !u!1 &1491431445937148
 GameObject:
   m_ObjectHideFlags: 0
