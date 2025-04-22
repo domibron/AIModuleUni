@@ -84,14 +84,14 @@ using UnityEngine;
 public class AI : MonoBehaviour
 {
     // Gives access to important data about the AI agent (see above)
-    [HideInInspector] public AgentData _agentData;
+    [HideInInspector] public AgentData AgentData;
     // Gives access to the agent senses
-    [HideInInspector] public Sensing _agentSenses;
+    [HideInInspector] public Sensing AgentSenses;
     // gives access to the agents inventory
-    [HideInInspector] public InventoryController _agentInventory;
+    [HideInInspector] public InventoryController AgentInventory;
     // This is the script containing the AI agents actions
     // e.g. agentScript.MoveTo(enemy);
-    [HideInInspector] public AgentActions _agentActions;
+    [HideInInspector] public AgentActions AgentActions;
 
 
     private Utility_AI _UtilAI = new Utility_AI();
@@ -101,16 +101,20 @@ public class AI : MonoBehaviour
         get { return _UtilAI; }
     }
 
+
+    float fear = 0;
+    float aggression = 0;
+
     void Awake()
     {
         // Initialise the accessable script components
-        _agentData = GetComponent<AgentData>();
-        _agentActions = GetComponent<AgentActions>();
-        _agentSenses = GetComponentInChildren<Sensing>();
-        _agentInventory = GetComponentInChildren<InventoryController>();
+        AgentData = GetComponent<AgentData>();
+        AgentActions = GetComponent<AgentActions>();
+        AgentSenses = GetComponentInChildren<Sensing>();
+        AgentInventory = GetComponentInChildren<InventoryController>();
 
-        _UtilAI.AddGoal(new Goal(GoalLabels.Health, _agentData.CurrentHitPoints, 0, _agentData.MaxHitPoints, CurveFunctions.Linear));
-        // _UtilAI.AddGoal(new Goal(GoalLabels.Fear, 0, 0, 10, CurveFunctions.Linear));
+        _UtilAI.AddGoal(new Goal(GoalLabels.Health, AgentData.MaxHitPoints - AgentData.CurrentHitPoints, 0, AgentData.MaxHitPoints, CurveFunctions.Linear));
+        _UtilAI.AddGoal(new Goal(GoalLabels.Fear, 0, 0, 10, CurveFunctions.Linear));
         // _UtilAI.AddGoal(new Goal(GoalLabels.Aggression, 0, 0, 10, CurveFunctions.Linear));
         // _UtilAI.AddGoal(new Goal(GoalLabels.AttackObjective, 0, 0, 1, CurveFunctions.Linear));
         // _UtilAI.AddGoal(new Goal(GoalLabels.DefendObjective, 0, 0, 1, CurveFunctions.Linear));
@@ -118,6 +122,9 @@ public class AI : MonoBehaviour
         HealSelf healSelf = new HealSelf(this);
         healSelf.SetGoalSatisfactionValue(GoalLabels.Health, 50);
         healSelf.SetGoalSatisfactionValue(GoalLabels.Fear, 5);
+
+        RunAway runAway = new RunAway(this);
+        runAway.SetGoalSatisfactionValue(GoalLabels.Fear, 3);
 
         _UtilAI.AddAction(healSelf);
     }
@@ -133,7 +140,50 @@ public class AI : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        UpdateHealthGoal();
+        UpdateAggression();
+        UpdateFear();
+
         // Run your AI code in here
         _UtilAI.ChooseAction(this).Execute(Time.deltaTime);
+    }
+
+    private void UpdateHealthGoal()
+    {
+        float health = Mathf.Clamp(0, AgentData.MaxHitPoints, AgentData.MaxHitPoints - AgentData.CurrentHitPoints);
+
+        _UtilAI.UpdateGoals(GoalLabels.Health, health);
+    }
+
+    private void UpdateFear()
+    {
+        List<GameObject> teammates = AgentSenses.GetFriendliesInView();
+
+        List<GameObject> enemies = AgentSenses.GetEnemiesInView();
+
+        // we adjust our fear based on proximity of the AI.
+        fear += Time.deltaTime * -teammates.Count + enemies.Count;// * 1 - (_agentData.CurrentHitPoints / _agentData.MaxHitPoints);
+
+        fear = Mathf.Clamp(0, 10, fear);
+
+        _UtilAI.UpdateGoals(GoalLabels.Fear, fear);
+    }
+
+    private void UpdateAggression()
+    {
+        List<GameObject> teammates = AgentSenses.GetFriendliesInView();
+
+        List<GameObject> enemies = AgentSenses.GetEnemiesInView();
+
+
+        if (enemies.Count > 0)
+            aggression += Time.deltaTime * teammates.Count - enemies.Count;// * 1 - (_agentData.CurrentHitPoints / _agentData.MaxHitPoints);
+        else
+            aggression -= Time.deltaTime; // for now it will just get reduced
+                                          // TODO have some based on proximity to the base.
+
+        aggression = Mathf.Clamp(0, 10, aggression);
+
+        _UtilAI.UpdateGoals(GoalLabels.Aggression, aggression);
     }
 }

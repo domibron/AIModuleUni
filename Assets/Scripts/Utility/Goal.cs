@@ -10,6 +10,7 @@ public enum GoalLabels
     Fear,
     AttackObjective,
     DefendObjective,
+    Boredom,
 }
 
 /// <summary>
