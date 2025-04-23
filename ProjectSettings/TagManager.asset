@@ -3,15 +3,21 @@
 --- !u!78 &1
 TagManager:
   serializedVersion: 2
-  tags: []
+  tags:
+  - Level
+  - Wall
+  - Flag
+  - Blue Team
+  - Red Team
+  - Collectable
   layers:
   - Default
   - TransparentFX
   - Ignore Raycast
-  - 
+  - Wall
   - Water
   - UI
-  - 
+  - VisibleToAI
   - 
   - 
   - 

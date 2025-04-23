@@ -561,7 +561,7 @@ GameObject:
   - component: {fileID: 114215944233940084}
   - component: {fileID: 114715059735131574}
   - component: {fileID: 114475680222163902}
-  m_Layer: 8
+  m_Layer: 6
   m_Name: Blue Team Member
   m_TagString: Blue Team
   m_Icon: {fileID: 0}
@@ -755,6 +755,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0d0a9694fea256c4a83566fa58bc8e47, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  AgentData: {fileID: 0}
+  AgentSenses: {fileID: 0}
+  AgentInventory: {fileID: 0}
+  AgentActions: {fileID: 0}
 --- !u!1 &1575705326943198
 GameObject:
   m_ObjectHideFlags: 0
@@ -887,10 +891,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   VisibleToAiMask:
     serializedVersion: 2
-    m_Bits: 256
+    m_Bits: 64
   WallsLayer:
     serializedVersion: 2
-    m_Bits: 512
+    m_Bits: 8
 --- !u!1 &1749181103277312
 GameObject:
   m_ObjectHideFlags: 0

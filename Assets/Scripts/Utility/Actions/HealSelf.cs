@@ -10,21 +10,10 @@ public class HealSelf : Action
 
     }
 
-    // Start is called before the first frame update
-    void Start()
-    {
-
-    }
-
-    // Update is called once per frame
-    void Update()
-    {
-
-    }
-
 
     public override void Execute(float deltaTime)
     {
+
         // check if we have a heal item in inventory. and use it.
         if (_agent.AgentInventory.HasItem(Names.HealthKit))
         {
@@ -80,7 +69,7 @@ public class HealSelf : Action
             return;
         }
 
-        if (_agent.transform.position == _agent.GetComponent<NavMeshAgent>().destination)
+        if (_agent.transform.position == _agent.GetComponent<NavMeshAgent>().destination || _agent.GetComponent<NavMeshAgent>().hasPath == false)
         {
             _agent.AgentActions.MoveToRandomLocation();
         }

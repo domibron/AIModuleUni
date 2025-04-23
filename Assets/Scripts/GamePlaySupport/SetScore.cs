@@ -10,10 +10,13 @@ using UnityEngine.UI;
 public class SetScore : MonoBehaviour
 {
     public GameObject EnemyFlag;
+    // public GameObject FriendlyFlag;
     public int Score;
 
     private bool _enemyFlagInBase;
     private const float ScoreTickDuration = 1.0f;
+
+    // private bool _friendlyFlagInBase;
 
     /// <summary>
     /// Collision with base trigger
@@ -22,11 +25,15 @@ public class SetScore : MonoBehaviour
     void OnTriggerEnter(Collider other)
     {
         // Only react to the enemy flag
-        if(other.gameObject.name.Equals(EnemyFlag.name))
+        if (other.gameObject.name.Equals(EnemyFlag.name))
         {
             _enemyFlagInBase = true;
             StartCoroutine(UpdateScore());
         }
+        // else if (other.gameObject.name.Equals(FriendlyFlag.name))
+        // {
+        //     _friendlyFlagInBase = false;
+        // }
     }
 
     /// <summary>
@@ -50,7 +57,7 @@ public class SetScore : MonoBehaviour
     IEnumerator UpdateScore()
     {
         // The score updates as long as the flag is in the base
-        while(_enemyFlagInBase)
+        while (_enemyFlagInBase)
         {
             yield return new WaitForSeconds(ScoreTickDuration);
             Score++;

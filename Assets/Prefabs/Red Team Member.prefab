@@ -343,7 +343,7 @@ GameObject:
   - component: {fileID: 114707554067482440}
   - component: {fileID: 114583674609416792}
   - component: {fileID: 114244726350463480}
-  m_Layer: 8
+  m_Layer: 6
   m_Name: Red Team Member
   m_TagString: Red Team
   m_Icon: {fileID: 0}
@@ -537,6 +537,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0d0a9694fea256c4a83566fa58bc8e47, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  AgentData: {fileID: 0}
+  AgentSenses: {fileID: 0}
+  AgentInventory: {fileID: 0}
+  AgentActions: {fileID: 0}
 --- !u!1 &1379185307853380
 GameObject:
   m_ObjectHideFlags: 0
@@ -662,10 +666,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   VisibleToAiMask:
     serializedVersion: 2
-    m_Bits: 0
+    m_Bits: 64
   WallsLayer:
     serializedVersion: 2
-    m_Bits: 0
+    m_Bits: 8
 --- !u!1 &1491431445937148
 GameObject:
   m_ObjectHideFlags: 0

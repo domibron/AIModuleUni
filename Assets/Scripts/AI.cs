@@ -104,6 +104,7 @@ public class AI : MonoBehaviour
 
     float fear = 0;
     float aggression = 0;
+    float defendObjective = 0;
 
     void Awake()
     {
@@ -115,13 +116,14 @@ public class AI : MonoBehaviour
 
         _UtilAI.AddGoal(new Goal(GoalLabels.Health, AgentData.MaxHitPoints - AgentData.CurrentHitPoints, 0, AgentData.MaxHitPoints, CurveFunctions.Linear));
         _UtilAI.AddGoal(new Goal(GoalLabels.Fear, 0, 0, 10, CurveFunctions.Linear));
-        // _UtilAI.AddGoal(new Goal(GoalLabels.Aggression, 0, 0, 10, CurveFunctions.Linear));
-        // _UtilAI.AddGoal(new Goal(GoalLabels.AttackObjective, 0, 0, 1, CurveFunctions.Linear));
-        // _UtilAI.AddGoal(new Goal(GoalLabels.DefendObjective, 0, 0, 1, CurveFunctions.Linear));
+        _UtilAI.AddGoal(new Goal(GoalLabels.Aggression, 0, 0, 10, CurveFunctions.Linear));
+        _UtilAI.AddGoal(new Goal(GoalLabels.Boredom, 0, 0, 10, CurveFunctions.Linear));
+        _UtilAI.AddGoal(new Goal(GoalLabels.AttackObjective, 0, 0, 10, CurveFunctions.Linear));
+        _UtilAI.AddGoal(new Goal(GoalLabels.DefendObjective, 0, 0, 10, CurveFunctions.Linear));
 
         HealSelf healSelf = new HealSelf(this);
         healSelf.SetGoalSatisfactionValue(GoalLabels.Health, 50);
-        healSelf.SetGoalSatisfactionValue(GoalLabels.Fear, 5);
+        healSelf.SetGoalSatisfactionValue(GoalLabels.Fear, 2);
 
         RunAway runAway = new RunAway(this);
         runAway.SetGoalSatisfactionValue(GoalLabels.Fear, 3);
@@ -144,8 +146,40 @@ public class AI : MonoBehaviour
         UpdateAggression();
         UpdateFear();
 
+        DefendBase();
+
         // Run your AI code in here
         _UtilAI.ChooseAction(this).Execute(Time.deltaTime);
+    }
+
+    private void DefendBase()
+    {
+        // check to see if we can see the base.
+
+        // if not, add to timer unless we see the enemy's objective.
+
+        // otherwise, go to base and check.
+
+        // while at base, see if flag is in base.
+
+        // search if not.
+
+        // otherwise check to see if teammates are closer to base and enemy not there.
+
+        // otherwise defend base.
+
+        if (AgentSenses.GetObjectInViewByName(Names.BlueBase) != null)
+        {
+            print("we can see the base");
+        }
+        else
+        {
+            print("we cannot see the base");
+        }
+
+        defendObjective = Mathf.Clamp(0, 10, defendObjective);
+
+        _UtilAI.UpdateGoals(GoalLabels.DefendObjective, defendObjective);
     }
 
     private void UpdateHealthGoal()

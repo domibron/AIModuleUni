@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 65438438863712728}
   - component: {fileID: 54867702428099458}
   - component: {fileID: 114124177036185738}
-  m_Layer: 8
+  m_Layer: 6
   m_Name: Blue Flag
   m_TagString: Flag
   m_Icon: {fileID: 0}
