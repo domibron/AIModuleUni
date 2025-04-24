@@ -28,6 +28,21 @@ public class Utility_AI
         _goals.Add(goal);
     }
 
+    public Goal GetGoalFromType(GoalLabels goalType)
+    {
+        foreach (Goal goal in _goals)
+        {
+            //Debug.Log("before update: goal " + goal.Type.ToString() + " value = " + goal.Value.ToString("F4"));
+            if (goal.Type == goalType)
+            {
+                return goal;
+            }
+            Debug.Log("Updated goal: " + goal.Type.ToString() + ", value: " + goal.BaseValue.ToString("F4"));
+        }
+
+        return null;
+    }
+
     /// <summary>
     /// Update the goal specified by the goalType parameter by the amount specified by the value paramter
     /// </summary>

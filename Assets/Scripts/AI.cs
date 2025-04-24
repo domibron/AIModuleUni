@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using TMPro;
 using UnityEngine;
 
 /*****************************************************************************************************************************
@@ -101,10 +102,22 @@ public class AI : MonoBehaviour
         get { return _UtilAI; }
     }
 
+    public TMP_Text debugText;
 
-    float fear = 0;
+    float healthGoal;
+
+    public float Fear = 0;
     float aggression = 0;
-    float defendObjective = 0;
+    [HideInInspector]
+    public float DefendObjective = 0;
+
+    public float MaxDistanceAwayFromBase = 15f;
+
+    public float DefendObjectiveDecayRate = 1f;
+
+    public GameObject EnemyWithFlag;
+
+    public float AttackObjective = 0;
 
     void Awake()
     {
@@ -116,19 +129,23 @@ public class AI : MonoBehaviour
 
         _UtilAI.AddGoal(new Goal(GoalLabels.Health, AgentData.MaxHitPoints - AgentData.CurrentHitPoints, 0, AgentData.MaxHitPoints, CurveFunctions.Linear));
         _UtilAI.AddGoal(new Goal(GoalLabels.Fear, 0, 0, 10, CurveFunctions.Linear));
-        _UtilAI.AddGoal(new Goal(GoalLabels.Aggression, 0, 0, 10, CurveFunctions.Linear));
+        _UtilAI.AddGoal(new Goal(GoalLabels.Aggression, 0, 0, 10, CurveFunctions.LinearNeverMax));
         _UtilAI.AddGoal(new Goal(GoalLabels.Boredom, 0, 0, 10, CurveFunctions.Linear));
         _UtilAI.AddGoal(new Goal(GoalLabels.AttackObjective, 0, 0, 10, CurveFunctions.Linear));
         _UtilAI.AddGoal(new Goal(GoalLabels.DefendObjective, 0, 0, 10, CurveFunctions.Linear));
 
         HealSelf healSelf = new HealSelf(this);
         healSelf.SetGoalSatisfactionValue(GoalLabels.Health, 50);
-        healSelf.SetGoalSatisfactionValue(GoalLabels.Fear, 2);
+        _UtilAI.AddAction(healSelf);
 
         RunAway runAway = new RunAway(this);
-        runAway.SetGoalSatisfactionValue(GoalLabels.Fear, 3);
+        runAway.SetGoalSatisfactionValue(GoalLabels.Fear, 6);
+        _UtilAI.AddAction(runAway);
 
-        _UtilAI.AddAction(healSelf);
+        DefendBase defendBase = new DefendBase(this);
+        defendBase.SetGoalSatisfactionValue(GoalLabels.DefendObjective, 5);
+        _UtilAI.AddAction(defendBase);
+
     }
 
     // Use this for initialization
@@ -146,15 +163,34 @@ public class AI : MonoBehaviour
         UpdateAggression();
         UpdateFear();
 
-        DefendBase();
+        UpdateDefendObjective();
+
+        debugText.text = $"Health Goal: {UtilAI.GetGoalFromType(GoalLabels.Health).FinalValue}\n"
+        + $"Fear Goal: {UtilAI.GetGoalFromType(GoalLabels.Fear).FinalValue}\n"
+        + $"Aggression Goal: {UtilAI.GetGoalFromType(GoalLabels.Aggression).FinalValue}\n"
+        + $"Boredom Goal: {UtilAI.GetGoalFromType(GoalLabels.Boredom).FinalValue}\n"
+        + $"Attack Objective Goal: {UtilAI.GetGoalFromType(GoalLabels.AttackObjective).FinalValue}\n"
+        + $"Defend Objective Goal: {UtilAI.GetGoalFromType(GoalLabels.DefendObjective).FinalValue}";
 
         // Run your AI code in here
         _UtilAI.ChooseAction(this).Execute(Time.deltaTime);
     }
 
-    private void DefendBase()
+    public GameObject GetFlagInView(string flagName)
     {
-        // check to see if we can see the base.
+        List<GameObject> items = AgentSenses.GetCollectablesInView();
+
+        foreach (GameObject item in items)
+        {
+            if (item.name == flagName) return item;
+        }
+
+        return null;
+    }
+
+    private void UpdateDefendObjective()
+    {
+        // check to see if we can see the base. Cant see the base but can sit near it.
 
         // if not, add to timer unless we see the enemy's objective.
 
@@ -168,25 +204,41 @@ public class AI : MonoBehaviour
 
         // otherwise defend base.
 
-        if (AgentSenses.GetObjectInViewByName(Names.BlueBase) != null)
+        if (Vector3.Distance(AgentData.FriendlyBase.transform.position, transform.position) < MaxDistanceAwayFromBase)
         {
-            print("we can see the base");
+
+            GameObject flagObject = GetFlagInView(AgentData.FriendlyFlagName);
+            if (flagObject != null && Vector3.Distance(flagObject.transform.position, AgentData.FriendlyBase.transform.position) < 3f)
+            {
+                DefendObjective -= Time.deltaTime * DefendObjectiveDecayRate;
+            }
+            else
+            {
+                if (flagObject != null)
+                {
+                    EnemyWithFlag = flagObject.transform.parent.gameObject;
+                    // TODO pass into aggression so this person gets p1 on by the gang.
+                }
+
+                // PANIC, ah
+                DefendObjective = 10;
+            }
         }
         else
         {
-            print("we cannot see the base");
+            DefendObjective += Time.deltaTime * 1f;
         }
 
-        defendObjective = Mathf.Clamp(0, 10, defendObjective);
+        DefendObjective = Mathf.Clamp(DefendObjective, 0, 10);
 
-        _UtilAI.UpdateGoals(GoalLabels.DefendObjective, defendObjective);
+        _UtilAI.UpdateGoals(GoalLabels.DefendObjective, DefendObjective);
     }
 
     private void UpdateHealthGoal()
     {
-        float health = Mathf.Clamp(0, AgentData.MaxHitPoints, AgentData.MaxHitPoints - AgentData.CurrentHitPoints);
+        healthGoal = Mathf.Clamp(AgentData.MaxHitPoints - AgentData.CurrentHitPoints, 0, AgentData.MaxHitPoints);
 
-        _UtilAI.UpdateGoals(GoalLabels.Health, health);
+        _UtilAI.UpdateGoals(GoalLabels.Health, healthGoal);
     }
 
     private void UpdateFear()
@@ -195,12 +247,26 @@ public class AI : MonoBehaviour
 
         List<GameObject> enemies = AgentSenses.GetEnemiesInView();
 
-        // we adjust our fear based on proximity of the AI.
-        fear += Time.deltaTime * -teammates.Count + enemies.Count;// * 1 - (_agentData.CurrentHitPoints / _agentData.MaxHitPoints);
+        Vector3 averagePos = Vector3.zero;
 
-        fear = Mathf.Clamp(0, 10, fear);
+        foreach (GameObject enemy in enemies)
+        {
+            averagePos += enemy.transform.position;
+        }
 
-        _UtilAI.UpdateGoals(GoalLabels.Fear, fear);
+        averagePos /= enemies.Count;
+
+        if (enemies.Count > 0)
+        {
+            // we adjust our fear based on proximity of the AI.
+            Fear += Time.deltaTime * (-teammates.Count + enemies.Count);// * 1 - (_agentData.CurrentHitPoints / _agentData.MaxHitPoints);
+        }
+        else
+            Fear -= Time.deltaTime * (1 + teammates.Count);
+
+        Fear = Mathf.Clamp(Fear, 0, 10);
+
+        _UtilAI.UpdateGoals(GoalLabels.Fear, Fear);
     }
 
     private void UpdateAggression()
@@ -216,7 +282,7 @@ public class AI : MonoBehaviour
             aggression -= Time.deltaTime; // for now it will just get reduced
                                           // TODO have some based on proximity to the base.
 
-        aggression = Mathf.Clamp(0, 10, aggression);
+        aggression = Mathf.Clamp(aggression, 0, 10);
 
         _UtilAI.UpdateGoals(GoalLabels.Aggression, aggression);
     }

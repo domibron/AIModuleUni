@@ -65,6 +65,7 @@ public class RunAway : Action
 
         if (enemies.Count <= 0 || _agent.transform.position == _agent.AgentData.FriendlyBase.transform.position)
         {
+            _agent.Fear = 0;
             _complete = true;
         }
     }

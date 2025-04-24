@@ -37,6 +37,12 @@ public static class CurveFunctions
         return _lowerValueRange + (_upperValueRange - _lowerValueRange) * (val - lowerValueRange) / (upperValueRange - lowerValueRange);
     }
 
+    // Returns a normalised insistence satisfaction value linearly to the input value but maxes at 0.9f.
+    public static float LinearNeverMax(float lowerValueRange, float upperValueRange, float val)
+    {
+        return _lowerValueRange + ((_upperValueRange - 0.1f) - _lowerValueRange) * (val - lowerValueRange) / (upperValueRange - lowerValueRange);
+    }
+
     // Returns a normalised exponetial insistence satisfaction value
     public static float Exponential(float lowerValueRange, float upperValueRange, float val)
     {

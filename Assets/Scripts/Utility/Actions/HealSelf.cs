@@ -37,13 +37,10 @@ public class HealSelf : Action
         {
             if (collectable.name == Names.HealthKit)
             {
-                bool areWeCloser = true;
-                foreach (GameObject enemy in enemies)
-                {
-                    if (!OurWeCloser(_agent.transform.position, enemy.transform.position, collectable.transform.position)) areWeCloser = false;
-                }
 
-                if (!areWeCloser) continue;
+                if (!OurWeCloser(enemies.ToArray(), collectable.transform.position)) continue;
+
+
 
                 float collectableDistance = Vector3.Distance(_agent.transform.position, collectable.transform.position);
 
@@ -69,7 +66,7 @@ public class HealSelf : Action
             return;
         }
 
-        if (_agent.transform.position == _agent.GetComponent<NavMeshAgent>().destination || _agent.GetComponent<NavMeshAgent>().hasPath == false)
+        if (Vector3.Distance(_agent.transform.position, _agent.GetComponent<NavMeshAgent>().destination) <= 2.5f || _agent.GetComponent<NavMeshAgent>().hasPath == false)
         {
             _agent.AgentActions.MoveToRandomLocation();
         }
@@ -79,14 +76,18 @@ public class HealSelf : Action
         // once we have a heal item, use it
     }
 
-    private bool OurWeCloser(Vector3 ourPos, Vector3 theirPos, Vector3 targetPos)
+    private bool OurWeCloser(GameObject[] positionsToCompare, Vector3 targetPos)
     {
-        if (Vector3.Distance(ourPos, targetPos) > Vector3.Distance(theirPos, targetPos))
+        bool weAreCloser = true;
+        foreach (var posToCompare in positionsToCompare)
         {
-            return true;
+            if (Vector3.Distance(_agent.transform.position, targetPos) > Vector3.Distance(posToCompare.transform.position, targetPos))
+            {
+                weAreCloser = false;
+            }
         }
 
-        return false;
+        return weAreCloser;
     }
 
     public override string ToString()
