@@ -46,7 +46,9 @@ public class DefendBase : Action
         }
         else if (Vector3.Distance(_agent.AgentData.FriendlyBase.transform.position, _agent.transform.position) <= _agent.MaxDistanceAwayFromBase)
         {
-            _agent.DefendObjective -= deltaTime;
+            // _agent.DefendObjective -= deltaTime;
+            _complete = true;
+
         }
 
 

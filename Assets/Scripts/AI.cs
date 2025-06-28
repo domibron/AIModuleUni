@@ -97,6 +97,7 @@ public class AI : MonoBehaviour
 
     private Utility_AI _UtilAI = new Utility_AI();
 
+    // what is this, this is not required no? nothing needs to know about util ai other than this.
     public Utility_AI UtilAI
     {
         get { return _UtilAI; }
@@ -104,20 +105,20 @@ public class AI : MonoBehaviour
 
     public TMP_Text debugText;
 
-    float healthGoal;
-
-    public float Fear = 0;
-    float aggression = 0;
-    [HideInInspector]
-    public float DefendObjective = 0;
-
-    public float MaxDistanceAwayFromBase = 15f;
 
     public float DefendObjectiveDecayRate = 1f;
+    public float MaxDistanceAwayFromBase = 15f;
+
+    [Header("Goals")] // This is not how the goal AI works. abusing the system to suit you needs i see.
+    float healthGoal;
+    public float Fear = 0;
+    public float Aggression = 0.5f;
+    public float DefendObjective = 0;
+    public float AttackObjective = 0.0f;
+    public float Boredom = 0.5f;
 
     public GameObject EnemyWithFlag;
 
-    public float AttackObjective = 0;
 
     void Awake()
     {
@@ -127,25 +128,40 @@ public class AI : MonoBehaviour
         AgentSenses = GetComponentInChildren<Sensing>();
         AgentInventory = GetComponentInChildren<InventoryController>();
 
+        // create the goals for the AI.
         _UtilAI.AddGoal(new Goal(GoalLabels.Health, AgentData.MaxHitPoints - AgentData.CurrentHitPoints, 0, AgentData.MaxHitPoints, CurveFunctions.Linear));
         _UtilAI.AddGoal(new Goal(GoalLabels.Fear, 0, 0, 10, CurveFunctions.Linear));
-        _UtilAI.AddGoal(new Goal(GoalLabels.Aggression, 0, 0, 10, CurveFunctions.LinearNeverMax));
-        _UtilAI.AddGoal(new Goal(GoalLabels.Boredom, 0, 0, 10, CurveFunctions.Linear));
+        _UtilAI.AddGoal(new Goal(GoalLabels.Aggression, 5, 0, 10, CurveFunctions.LinearNeverMax));
+        _UtilAI.AddGoal(new Goal(GoalLabels.Boredom, 5, 0, 10, CurveFunctions.Linear));
         _UtilAI.AddGoal(new Goal(GoalLabels.AttackObjective, 0, 0, 10, CurveFunctions.Linear));
         _UtilAI.AddGoal(new Goal(GoalLabels.DefendObjective, 0, 0, 10, CurveFunctions.Linear));
 
+        // add actions that satisfy goals.
         HealSelf healSelf = new HealSelf(this);
         healSelf.SetGoalSatisfactionValue(GoalLabels.Health, 50);
         _UtilAI.AddAction(healSelf);
 
         RunAway runAway = new RunAway(this);
-        runAway.SetGoalSatisfactionValue(GoalLabels.Fear, 6);
+        runAway.SetGoalSatisfactionValue(GoalLabels.Fear, 10);
         _UtilAI.AddAction(runAway);
 
         DefendBase defendBase = new DefendBase(this);
-        defendBase.SetGoalSatisfactionValue(GoalLabels.DefendObjective, 5);
+        defendBase.SetGoalSatisfactionValue(GoalLabels.DefendObjective, 10);
         _UtilAI.AddAction(defendBase);
 
+        AttackEnemy attackEnemy = new AttackEnemy(this);
+        attackEnemy.SetGoalSatisfactionValue(GoalLabels.Aggression, 10);
+        attackEnemy.SetGoalSatisfactionValue(GoalLabels.Boredom, 5);
+        _UtilAI.AddAction(attackEnemy);
+
+        AttackEnemyBase attackEnemyBase = new AttackEnemyBase(this);
+        attackEnemyBase.SetGoalSatisfactionValue(GoalLabels.Boredom, 5);
+        attackEnemyBase.SetGoalSatisfactionValue(GoalLabels.AttackObjective, 10);
+
+
+        // state machines might be better for our case, as well we want to de specific thing because of specific state.
+        // state machines with fuzzy logic. I fear of what this has become. A complex way to do state machines.
+        // may god have mercy on my soul.    
     }
 
     // Use this for initialization
@@ -170,7 +186,8 @@ public class AI : MonoBehaviour
         + $"Aggression Goal: {UtilAI.GetGoalFromType(GoalLabels.Aggression).FinalValue}\n"
         + $"Boredom Goal: {UtilAI.GetGoalFromType(GoalLabels.Boredom).FinalValue}\n"
         + $"Attack Objective Goal: {UtilAI.GetGoalFromType(GoalLabels.AttackObjective).FinalValue}\n"
-        + $"Defend Objective Goal: {UtilAI.GetGoalFromType(GoalLabels.DefendObjective).FinalValue}";
+        + $"Attack Objective Goal: {UtilAI.GetGoalFromType(GoalLabels.AttackObjective).FinalValue}\n"
+        + $"Current Action: {_UtilAI.ChooseAction(this).ToString()}\n";
 
         // Run your AI code in here
         _UtilAI.ChooseAction(this).Execute(Time.deltaTime);
@@ -186,6 +203,11 @@ public class AI : MonoBehaviour
         }
 
         return null;
+    }
+
+    private void UpdateBoredom()
+    {
+
     }
 
     private void UpdateDefendObjective()
@@ -208,7 +230,7 @@ public class AI : MonoBehaviour
         {
 
             GameObject flagObject = GetFlagInView(AgentData.FriendlyFlagName);
-            if (flagObject != null && Vector3.Distance(flagObject.transform.position, AgentData.FriendlyBase.transform.position) < 3f)
+            if (flagObject != null && Vector3.Distance(flagObject.transform.position, AgentData.FriendlyBase.transform.position) < 6f) // magic number
             {
                 DefendObjective -= Time.deltaTime * DefendObjectiveDecayRate;
             }
@@ -221,12 +243,12 @@ public class AI : MonoBehaviour
                 }
 
                 // PANIC, ah
-                DefendObjective = 10;
+                // DefendObjective = 10;
             }
         }
         else
         {
-            DefendObjective += Time.deltaTime * 1f;
+            DefendObjective += Time.deltaTime * 0.1f;
         }
 
         DefendObjective = Mathf.Clamp(DefendObjective, 0, 10);
@@ -236,7 +258,7 @@ public class AI : MonoBehaviour
 
     private void UpdateHealthGoal()
     {
-        healthGoal = Mathf.Clamp(AgentData.MaxHitPoints - AgentData.CurrentHitPoints, 0, AgentData.MaxHitPoints);
+        healthGoal = Mathf.Clamp(AgentData.MaxHitPoints - AgentData.CurrentHitPoints, 0, AgentData.MaxHitPoints) - Aggression;
 
         _UtilAI.UpdateGoals(GoalLabels.Health, healthGoal);
     }
@@ -256,8 +278,9 @@ public class AI : MonoBehaviour
 
         averagePos /= enemies.Count;
 
-        if (enemies.Count > 0)
+        if (enemies.Count > 0 && Vector3.Distance(transform.position, averagePos) < 5f) // magic numbers
         {
+
             // we adjust our fear based on proximity of the AI.
             Fear += Time.deltaTime * (-teammates.Count + enemies.Count);// * 1 - (_agentData.CurrentHitPoints / _agentData.MaxHitPoints);
         }
@@ -277,13 +300,13 @@ public class AI : MonoBehaviour
 
 
         if (enemies.Count > 0)
-            aggression += Time.deltaTime * teammates.Count - enemies.Count;// * 1 - (_agentData.CurrentHitPoints / _agentData.MaxHitPoints);
+            Aggression += Time.deltaTime * (teammates.Count - enemies.Count);// * 1 - (_agentData.CurrentHitPoints / _agentData.MaxHitPoints);
         else
-            aggression -= Time.deltaTime; // for now it will just get reduced
+            Aggression -= Time.deltaTime; // for now it will just get reduced
                                           // TODO have some based on proximity to the base.
 
-        aggression = Mathf.Clamp(aggression, 0, 10);
+        Aggression = Mathf.Clamp(Aggression, 0, 10);
 
-        _UtilAI.UpdateGoals(GoalLabels.Aggression, aggression);
+        _UtilAI.UpdateGoals(GoalLabels.Aggression, Aggression);
     }
 }

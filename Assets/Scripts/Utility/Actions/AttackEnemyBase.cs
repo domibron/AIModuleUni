@@ -2,17 +2,19 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class AttackEnemyBase : MonoBehaviour
+public class AttackEnemyBase : Action
 {
-    // Start is called before the first frame update
-    void Start()
+    public AttackEnemyBase(AI agent) : base(agent)
     {
-        
     }
 
-    // Update is called once per frame
-    void Update()
+    public override void Execute(float deltaTime)
     {
-        
+        throw new System.NotImplementedException();
+    }
+
+    public override string ToString()
+    {
+        throw new System.NotImplementedException();
     }
 }
