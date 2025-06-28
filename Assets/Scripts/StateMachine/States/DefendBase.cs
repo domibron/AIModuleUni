@@ -2,18 +2,19 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class AttackEnemyBase : Action
+public class DefendBase : StateBase
 {
-    public AttackEnemyBase(AI agent) : base(agent)
-    {
-    }
-
-    public override void Execute(float deltaTime)
+    public override void Enter(AI entity)
     {
         throw new System.NotImplementedException();
     }
 
-    public override string ToString()
+    public override void Execute(AI entity)
+    {
+        throw new System.NotImplementedException();
+    }
+
+    public override void Exit(AI entity)
     {
         throw new System.NotImplementedException();
     }

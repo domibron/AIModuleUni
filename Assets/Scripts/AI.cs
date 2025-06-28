@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
+using UnityEngine.AI;
 
 /*****************************************************************************************************************************
  * Write your core AI code in this file here. The private variable 'agentScript' contains all the agents actions which are listed
@@ -93,21 +94,26 @@ public class AI : MonoBehaviour
     // This is the script containing the AI agents actions
     // e.g. agentScript.MoveTo(enemy);
     [HideInInspector] public AgentActions AgentActions;
+    [HideInInspector] public NavMeshAgent NavAgent;
 
 
     private FiniteStateMachine _fsm;
 
     public TMP_Text debugText;
 
+    public const float MinDistanceToBaseToDrop = 2f;
 
 
     void Awake()
     {
         // Initialise the accessible script components
+        NavAgent = GetComponent<NavMeshAgent>();
+
         AgentData = GetComponent<AgentData>();
         AgentActions = GetComponent<AgentActions>();
         AgentSenses = GetComponentInChildren<Sensing>();
         AgentInventory = GetComponentInChildren<InventoryController>();
+
 
         _fsm = new FiniteStateMachine(this);
     }
@@ -126,16 +132,15 @@ public class AI : MonoBehaviour
         _fsm.Update();
     }
 
-    public GameObject GetFlagInView(string flagName)
+
+    public bool HasReachedDestination()
     {
-        List<GameObject> items = AgentSenses.GetCollectablesInView();
+        if (NavAgent.pathPending) return false;
 
-        foreach (GameObject item in items)
-        {
-            if (item.name == flagName) return item;
-        }
+        if (NavAgent.remainingDistance > NavAgent.stoppingDistance) return false;
 
-        return null;
+        if (NavAgent.hasPath || NavAgent.velocity.sqrMagnitude == 0f) return true;
+        else return false;
     }
 
 

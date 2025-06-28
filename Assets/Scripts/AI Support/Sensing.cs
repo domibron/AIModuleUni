@@ -75,6 +75,34 @@ public class Sensing : MonoBehaviour
 
     #endregion
 
+    // so I dont need to define flags in ai code.
+    public GameObject GetFriendlyFlagInView()
+    {
+        return GetFlagInView(_agentData.FriendlyFlagName);
+    }
+
+    public GameObject GetEnemyFlagInView()
+    {
+        return GetFlagInView(_agentData.EnemyFlagName);
+    }
+
+    public GameObject GetFlagInView(string flagName)
+    {
+
+        Collider[] colliders = Physics.OverlapSphere(transform.position, _agentData.ViewRange, VisibleToAiMask, QueryTriggerInteraction.Collide);
+        // List<GameObject> items = GetCollectablesInView();
+
+        foreach (Collider collider in colliders)
+        {
+            //if (collider.gameObject.name.Equals(gameObject.transform.parent.name)) continue;
+            if (Physics.Linecast(transform.position, collider.gameObject.transform.position, WallsLayer, QueryTriggerInteraction.Ignore)) continue;
+
+            if (collider.transform.name == flagName) return collider.gameObject;
+        }
+
+        return null;
+    }
+
 
     #region GetVectorToTarget
 

@@ -53,6 +53,7 @@
     },
     "dotnet.defaultSolution": "AIModuleUni.sln",
     "cSpell.words": [
+        "Linecast",
         "Mathf"
     ]
 }

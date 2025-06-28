@@ -7,7 +7,22 @@ public class FiniteStateMachine : MonoBehaviour
     private AI _aiOwner;
 
     // states
-    private Wonder _wonderState = new Wonder();
+    public Wonder WonderState = new Wonder();
+
+    public GoToEnemyBase GoToEnemyBase = new GoToEnemyBase();
+    public GoToBase GoToBase = new GoToBase();
+    public Flee Flee = new Flee();
+
+    public AttackEnemy AttackEnemy = new AttackEnemy();
+    public AttackFlagCarrier AttackFlagCarrier = new AttackFlagCarrier();
+
+    public PickUpItem PickUpItem = new PickUpItem();
+    public StealEnemyFlag StealEnemyFlag = new StealEnemyFlag();
+    public Heal Heal = new Heal();
+
+    public ReturnFriendlyFlag ReturnFriendlyFlag = new ReturnFriendlyFlag();
+    public DefendBase DefendBase = new DefendBase();
+
 
     // current state
     private StateBase _currentState = null;
@@ -15,7 +30,7 @@ public class FiniteStateMachine : MonoBehaviour
     public FiniteStateMachine(AI aIOwner)
     {
         _aiOwner = aIOwner;
-        _currentState = _wonderState; // set default state.
+        _currentState = WonderState; // set default state.
     }
 
     public void Update()
