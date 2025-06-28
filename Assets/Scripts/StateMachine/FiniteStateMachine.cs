@@ -7,6 +7,7 @@ public class FiniteStateMachine : MonoBehaviour
     private AI _aiOwner;
 
     // states
+    private Wonder _wonderState = new Wonder();
 
     // current state
     private StateBase _currentState = null;
@@ -14,6 +15,7 @@ public class FiniteStateMachine : MonoBehaviour
     public FiniteStateMachine(AI aIOwner)
     {
         _aiOwner = aIOwner;
+        _currentState = _wonderState; // set default state.
     }
 
     public void Update()
