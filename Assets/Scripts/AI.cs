@@ -96,12 +96,24 @@ public class AI : MonoBehaviour
     [HideInInspector] public AgentActions AgentActions;
     [HideInInspector] public NavMeshAgent NavAgent;
 
-
+    /// <summary>
+    /// The finite state machine that makes this ai "think".
+    /// </summary>
     private FiniteStateMachine _fsm;
 
+    /// <summary>
+    /// Debug text so we can see what state the AI is in.
+    /// </summary>
     public TMP_Text debugText;
 
-    public const float MinDistanceToBaseToDrop = 2f;
+    /// <summary>
+    /// Used to know the min distance to drop or be at the base. (fixes collision issues)
+    /// </summary>
+    public const float MinDistanceToBase = 2f;
+
+    /// <summary>
+    /// Used to stop the AI spotting the AI from across the map and attacking. (should reduce AI sight as its a bit insane).
+    /// </summary>
     public const float MaxRangeToAttackEnemy = 5f;
 
 
@@ -115,7 +127,7 @@ public class AI : MonoBehaviour
         AgentSenses = GetComponentInChildren<Sensing>();
         AgentInventory = GetComponentInChildren<InventoryController>();
 
-
+        // sets up the FSM
         _fsm = new FiniteStateMachine(this);
     }
 
@@ -130,13 +142,18 @@ public class AI : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        // finite state machine ticking.
         _fsm.Update();
 
-        print(_fsm.ToString());
+        // debug printing.
+        print(transform.name + ": " + _fsm.ToString());
         debugText.text = "" + _fsm.ToString();
     }
 
-
+    /// <summary>
+    /// Helper function to know if we reached the target point.
+    /// </summary>
+    /// <returns>True if the agent reached the target point.</returns>
     public bool HasReachedDestination()
     {
         if (NavAgent.pathPending) return false;

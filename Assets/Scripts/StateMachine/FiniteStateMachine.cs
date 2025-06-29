@@ -2,12 +2,16 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class FiniteStateMachine : MonoBehaviour
+/// <summary>
+/// The AI state machine.
+/// </summary>
+public class FiniteStateMachine
 {
+    // owning AI.
     private AI _aiOwner;
 
     // states
-    // public Wonder WonderState = new Wonder();
+    // All AI states
 
     public GoToEnemyBase GoToEnemyBase;
     public GoToBase GoToBase;
@@ -50,11 +54,18 @@ public class FiniteStateMachine : MonoBehaviour
 
     }
 
+    /// <summary>
+    /// Runs the AI state ticking. (per frame).
+    /// </summary>
     public void Update()
     {
         if (_currentState != null) _currentState.Execute(_aiOwner);
     }
 
+    /// <summary>
+    /// Changes the current AI state to the new one.
+    /// </summary>
+    /// <param name="newState">The new state to switch to.</param>
     public void ChangeState(StateBase newState)
     {
         if (_currentState != null)
@@ -70,6 +81,10 @@ public class FiniteStateMachine : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Returns the current state the AI is running.
+    /// </summary>
+    /// <returns>String name of the AI state class.</returns>
     public override string ToString()
     {
         return $"{_currentState.ToString()}";

@@ -11,20 +11,23 @@ public class Flee : StateBase
 
     public override void Enter(AI entity)
     {
+        // go to random location because flee vector makes ai go into corner.
         entity.AgentActions.MoveToRandomLocation();
     }
 
     public override void Execute(AI entity)
     {
-        // presuming this is being called in a update method. aware that there is a possibility its not, but I know that it is.
-
+        // have we reached the random point, then get a new point.
         if (entity.HasReachedDestination())
         {
-            entity.AgentActions.MoveToRandomLocation(); // TODO, use dot to make sure its away from enemy and not make the AI go into the enemy
+            // TODO, use dot to make sure its away from enemy and not make the AI go into the enemy
+            entity.AgentActions.MoveToRandomLocation();
         }
 
-        bool isEnemyInSight = FleeFromEnemies(entity);
+        // are there still enemies chasing.
+        bool isEnemyInSight = entity.AgentSenses.GetEnemiesInView().Count > 0;
 
+        // if there are no enemies, then we can go back to healing or base.
         if (!isEnemyInSight)
         {
             if (entity.AgentData.CurrentHitPoints < entity.AgentData.MaxHitPoints / 4f)
@@ -42,20 +45,5 @@ public class Flee : StateBase
     public override void Exit(AI entity)
     {
 
-    }
-
-    private bool FleeFromEnemies(AI entity)
-    {
-        // I believe there is something wrong with the sensing, it can spot enemies and items through walls some how.
-        // TODO investigate if i come back here.
-        GameObject enemy = entity.AgentSenses.GetNearestEnemyInView();
-
-        if (enemy != null)
-        {
-            //entity.AgentActions.Flee(enemy);
-            return true;
-        }
-
-        return false;
     }
 }

@@ -10,18 +10,20 @@ public class GoToEnemyBase : StateBase
 
     public override void Enter(AI entity)
     {
+        // go to the enemy's base.
         entity.AgentActions.MoveTo(entity.AgentData.EnemyBase);
     }
 
     public override void Execute(AI entity)
     {
-
+        // if we are hurt then go heal.
         if (entity.AgentData.CurrentHitPoints < entity.AgentData.MaxHitPoints / 4f)
         {
             _owningFSM.ChangeState(_owningFSM.Heal);
             return;
         }
 
+        // if we have either flag in our inventory, then we need to be in the respected state.
         if (entity.AgentData.HasFriendlyFlag)
         {
             _owningFSM.ChangeState(_owningFSM.ReturnFriendlyFlag);
@@ -33,18 +35,19 @@ public class GoToEnemyBase : StateBase
             return;
         }
 
+        // see if we can see the friendly flag.
         GameObject friendlyFlag = entity.AgentSenses.GetFriendlyFlagInView();
 
-
+        // if we can spot our flag and its not at our base, go return it.
         if (friendlyFlag != null)
         {
-            if (Vector3.Distance(friendlyFlag.transform.position, entity.AgentData.EnemyBase.transform.position) <
-                Vector3.Distance(friendlyFlag.transform.position, entity.AgentData.FriendlyBase.transform.position))
+            if (Vector3.Distance(friendlyFlag.transform.position, entity.AgentData.FriendlyBase.transform.position) > AI.MinDistanceToBase)
             {
                 _owningFSM.ChangeState(_owningFSM.ReturnFriendlyFlag);
                 return;
             }
         }
+        // does an enemy have our flag, go get it back.
         else if (friendlyFlag?.transform.parent != null)
         {
             if (friendlyFlag.transform.parent.gameObject.tag == entity.AgentData.EnemyTeamTag)
@@ -54,14 +57,16 @@ public class GoToEnemyBase : StateBase
             }
         }
 
+        // see if we can see our flag.
         GameObject enemyFlag = entity.AgentSenses.GetEnemyFlagInView();
 
-        // if the flag is 
+        // can we see the enemy flag and no one has it, go steal it.
         if (enemyFlag != null && enemyFlag.transform.parent == null)
         {
             _owningFSM.ChangeState(_owningFSM.StealEnemyFlag);
             return;
         }
+        // if an enemy has the flag, go attack them.
         else if (enemyFlag != null && enemyFlag.transform.parent != null)
         {
             if (enemyFlag.transform.parent.gameObject.tag == entity.AgentData.EnemyTeamTag)
@@ -71,6 +76,7 @@ public class GoToEnemyBase : StateBase
             }
         }
 
+        // if there are enemies, go attack them.
         if (entity.AgentSenses.GetEnemiesInView().Count > 0)
         {
             if (Vector3.Distance(entity.AgentSenses.GetNearestEnemyInView().transform.position, entity.transform.position) <= AI.MaxRangeToAttackEnemy)
@@ -80,6 +86,7 @@ public class GoToEnemyBase : StateBase
             }
         }
 
+        // if there are items, then go get them.
         if (entity.AgentSenses.GetCollectablesInView().Count > 0)
         {
             _owningFSM.ChangeState(_owningFSM.PickUpItem);
@@ -87,8 +94,8 @@ public class GoToEnemyBase : StateBase
         }
 
 
-
-        if (entity.HasReachedDestination() || Vector3.Distance(entity.transform.position, entity.AgentData.EnemyBase.transform.position) < AI.MinDistanceToBaseToDrop)
+        // if we are at the enemy's base, there's no flag or enemies or anything, then go back to our base.
+        if (entity.HasReachedDestination() || Vector3.Distance(entity.transform.position, entity.AgentData.EnemyBase.transform.position) < AI.MinDistanceToBase)
         {
             _owningFSM.ChangeState(_owningFSM.GoToBase);
             return;
