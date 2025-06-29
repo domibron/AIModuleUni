@@ -4,6 +4,10 @@ using UnityEngine;
 
 public class Wonder : StateBase
 {
+    public Wonder(FiniteStateMachine fsm) : base(fsm)
+    {
+    }
+
     public override void Enter(AI entity)
     {
         throw new System.NotImplementedException();
@@ -15,6 +19,11 @@ public class Wonder : StateBase
     }
 
     public override void Exit(AI entity)
+    {
+        throw new System.NotImplementedException();
+    }
+
+    public override string ToString()
     {
         throw new System.NotImplementedException();
     }

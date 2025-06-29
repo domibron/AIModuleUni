@@ -224,7 +224,7 @@ public class AgentData : MonoBehaviour
 
     #region TakeDamage
     /// <summary>
-    /// We've been hit and taken some damage
+    /// We've been hit and taken some damageD
     /// If hit points reach zero we've died
     /// </summary>
     /// <param name="damage"></param>

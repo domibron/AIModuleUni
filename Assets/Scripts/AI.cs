@@ -102,6 +102,7 @@ public class AI : MonoBehaviour
     public TMP_Text debugText;
 
     public const float MinDistanceToBaseToDrop = 2f;
+    public const float MaxRangeToAttackEnemy = 5f;
 
 
     void Awake()
@@ -130,6 +131,9 @@ public class AI : MonoBehaviour
     void Update()
     {
         _fsm.Update();
+
+        print(_fsm.ToString());
+        debugText.text = "" + _fsm.ToString();
     }
 
 

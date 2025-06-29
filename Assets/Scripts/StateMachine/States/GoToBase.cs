@@ -4,6 +4,10 @@ using UnityEngine;
 
 public class GoToBase : StateBase
 {
+    public GoToBase(FiniteStateMachine fsm) : base(fsm)
+    {
+    }
+
     public override void Enter(AI entity)
     {
         entity.AgentActions.MoveTo(entity.AgentData.FriendlyBase);
@@ -19,6 +23,17 @@ public class GoToBase : StateBase
             return;
         }
 
+        if (entity.AgentData.HasFriendlyFlag)
+        {
+            _owningFSM.ChangeState(_owningFSM.ReturnFriendlyFlag);
+            return;
+        }
+        else if (entity.AgentData.HasEnemyFlag)
+        {
+            _owningFSM.ChangeState(_owningFSM.StealEnemyFlag);
+            return;
+        }
+
         GameObject friendlyFlag = entity.AgentSenses.GetFriendlyFlagInView();
 
         if (friendlyFlag == null)
@@ -29,22 +44,17 @@ public class GoToBase : StateBase
                 _owningFSM.ChangeState(_owningFSM.ReturnFriendlyFlag);
             }
         }
-        else if (friendlyFlag?.transform.parent != null)
+        else if (friendlyFlag?.transform.parent != null) // does some one have our flag
         {
-            _owningFSM.ChangeState(_owningFSM.AttackFlagCarrier);
-            return;
+            if (friendlyFlag.transform.parent.gameObject.tag == entity.AgentData.EnemyTeamTag)
+            {
+                _owningFSM.ChangeState(_owningFSM.AttackFlagCarrier);
+                return;
+            }
         }
-
-        if (entity.AgentSenses.GetEnemiesInView().Count > 0)
+        else if (Vector3.Distance(friendlyFlag.transform.position, entity.AgentData.FriendlyBase.transform.position) > AI.MinDistanceToBaseToDrop)
         {
-            _owningFSM.ChangeState(_owningFSM.AttackEnemy);
-            return;
-        }
-
-        if (entity.AgentSenses.GetCollectablesInView().Count > 0)
-        {
-            _owningFSM.ChangeState(_owningFSM.PickUpItem);
-            return;
+            _owningFSM.ChangeState(_owningFSM.ReturnFriendlyFlag);
         }
 
         GameObject enemyFlag = entity.AgentSenses.GetEnemyFlagInView();
@@ -57,13 +67,40 @@ public class GoToBase : StateBase
         }
         else if (enemyFlag != null && enemyFlag.transform.parent != null)
         {
-            _owningFSM.ChangeState(_owningFSM.AttackFlagCarrier);
+            if (enemyFlag.transform.parent.gameObject.tag == entity.AgentData.EnemyTeamTag)
+            {
+                _owningFSM.ChangeState(_owningFSM.AttackFlagCarrier);
+                return;
+            }
+        }
+
+        if (entity.AgentSenses.GetEnemiesInView().Count > 0)
+        {
+            if (Vector3.Distance(entity.AgentSenses.GetNearestEnemyInView().transform.position, entity.transform.position) <= AI.MaxRangeToAttackEnemy)
+            {
+                _owningFSM.ChangeState(_owningFSM.AttackEnemy);
+                return;
+            }
+        }
+
+        if (entity.AgentSenses.GetCollectablesInView().Count > 0)
+        {
+            _owningFSM.ChangeState(_owningFSM.PickUpItem);
             return;
         }
 
-        if (entity.HasReachedDestination())
+
+
+        if (entity.HasReachedDestination() || Vector3.Distance(entity.transform.position, entity.AgentData.FriendlyBase.transform.position) < AI.MinDistanceToBaseToDrop)
         {
-            _owningFSM.ChangeState(_owningFSM.GoToEnemyBase);
+            if (entity.AgentSenses.GetFriendlyFlagInView() != null && entity.AgentSenses.GetEnemyFlagInView() != null)
+            {
+                _owningFSM.ChangeState(_owningFSM.DefendBase);
+            }
+            else
+            {
+                _owningFSM.ChangeState(_owningFSM.GoToEnemyBase);
+            }
             return;
         }
     }

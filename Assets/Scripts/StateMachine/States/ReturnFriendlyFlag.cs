@@ -8,6 +8,9 @@ public class ReturnFriendlyFlag : StateBase
 
     private bool _checkedBase = false;
 
+    public ReturnFriendlyFlag(FiniteStateMachine fsm) : base(fsm)
+    {
+    }
 
     public override void Enter(AI entity)
     {
@@ -32,15 +35,27 @@ public class ReturnFriendlyFlag : StateBase
         //     _owningFSM.ChangeState(_owningFSM.AttackEnemy);
         //     return;
         // }
+        _friendlyFlag = entity.AgentSenses.GetFriendlyFlagInView();
 
-
-        if (!_checkedBase)
+        if (!_checkedBase && _friendlyFlag == null && !entity.AgentData.HasFriendlyFlag)
         {
-            if (entity.HasReachedDestination())
+            if (entity.HasReachedDestination() || Vector3.Distance(entity.transform.position, entity.AgentData.FriendlyBase.transform.position) <= AI.MinDistanceToBaseToDrop)
             {
                 // we are at the base. lets check for the flag.
-                _friendlyFlag = entity.AgentSenses.GetFriendlyFlagInView();
+
                 _checkedBase = true;
+            }
+
+            return;
+        }
+        else if (_friendlyFlag == null && !entity.AgentData.HasFriendlyFlag)
+        {
+            entity.AgentActions.MoveTo(entity.AgentData.EnemyBase);
+
+            if (Vector3.Distance(entity.transform.position, entity.AgentData.EnemyBase.transform.position) <= AI.MinDistanceToBaseToDrop)
+            {
+                _owningFSM.ChangeState(_owningFSM.GoToBase);
+                return;
             }
 
             return;
@@ -50,8 +65,16 @@ public class ReturnFriendlyFlag : StateBase
         {
             if (_friendlyFlag.transform.parent != null)
             {
-                _owningFSM.ChangeState(_owningFSM.AttackFlagCarrier);
-                return;
+                if (_friendlyFlag.transform.parent.tag == entity.AgentData.EnemyTeamTag)
+                {
+                    _owningFSM.ChangeState(_owningFSM.AttackFlagCarrier);
+                    return;
+                }
+                else
+                {
+                    _owningFSM.ChangeState(_owningFSM.GoToBase);
+                    return;
+                }
             }
 
             entity.AgentActions.MoveTo(_friendlyFlag);
@@ -63,7 +86,9 @@ public class ReturnFriendlyFlag : StateBase
         }
         else if (entity.AgentData.HasFriendlyFlag && Vector3.Distance(entity.transform.position, entity.AgentData.FriendlyBase.transform.position) <= AI.MinDistanceToBaseToDrop)
         {
-            _owningFSM.ChangeState(_owningFSM.GoToEnemyBase);
+
+            _owningFSM.ChangeState(_owningFSM.GoToBase);
+            return;
         }
 
         // we checked the 
@@ -71,6 +96,7 @@ public class ReturnFriendlyFlag : StateBase
 
     public override void Exit(AI entity)
     {
-        entity.AgentActions.DropItem(entity.AgentInventory.GetItem(entity.AgentData.FriendlyFlagName));
+        if (entity.AgentInventory.HasItem(entity.AgentData.FriendlyFlagName))
+            entity.AgentActions.DropItem(entity.AgentInventory.GetItem(entity.AgentData.FriendlyFlagName));
     }
 }

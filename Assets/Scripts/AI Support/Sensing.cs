@@ -75,7 +75,7 @@ public class Sensing : MonoBehaviour
 
     #endregion
 
-    // so I dont need to define flags in ai code.
+
     public GameObject GetFriendlyFlagInView()
     {
         return GetFlagInView(_agentData.FriendlyFlagName);
@@ -95,9 +95,13 @@ public class Sensing : MonoBehaviour
         foreach (Collider collider in colliders)
         {
             //if (collider.gameObject.name.Equals(gameObject.transform.parent.name)) continue;
-            if (Physics.Linecast(transform.position, collider.gameObject.transform.position, WallsLayer, QueryTriggerInteraction.Ignore)) continue;
-
-            if (collider.transform.name == flagName) return collider.gameObject;
+            if (!Physics.Linecast(transform.position, collider.gameObject.transform.position, WallsLayer, QueryTriggerInteraction.Ignore))
+            {
+                if (collider.transform.name == flagName)
+                {
+                    return collider.gameObject;
+                }
+            }
         }
 
         return null;

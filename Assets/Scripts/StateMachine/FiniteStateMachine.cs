@@ -7,21 +7,21 @@ public class FiniteStateMachine : MonoBehaviour
     private AI _aiOwner;
 
     // states
-    public Wonder WonderState = new Wonder();
+    // public Wonder WonderState = new Wonder();
 
-    public GoToEnemyBase GoToEnemyBase = new GoToEnemyBase();
-    public GoToBase GoToBase = new GoToBase();
-    public Flee Flee = new Flee();
+    public GoToEnemyBase GoToEnemyBase;
+    public GoToBase GoToBase;
+    public Flee Flee;
 
-    public AttackEnemy AttackEnemy = new AttackEnemy();
-    public AttackFlagCarrier AttackFlagCarrier = new AttackFlagCarrier();
+    public AttackEnemy AttackEnemy;
+    public AttackFlagCarrier AttackFlagCarrier;
 
-    public PickUpItem PickUpItem = new PickUpItem();
-    public StealEnemyFlag StealEnemyFlag = new StealEnemyFlag();
-    public Heal Heal = new Heal();
+    public PickUpItem PickUpItem;
+    public StealEnemyFlag StealEnemyFlag;
+    public Heal Heal;
 
-    public ReturnFriendlyFlag ReturnFriendlyFlag = new ReturnFriendlyFlag();
-    public DefendBase DefendBase = new DefendBase();
+    public ReturnFriendlyFlag ReturnFriendlyFlag;
+    public DefendBase DefendBase;
 
 
     // current state
@@ -30,7 +30,24 @@ public class FiniteStateMachine : MonoBehaviour
     public FiniteStateMachine(AI aIOwner)
     {
         _aiOwner = aIOwner;
-        _currentState = WonderState; // set default state.
+
+        GoToEnemyBase = new GoToEnemyBase(this);
+        GoToBase = new GoToBase(this);
+        Flee = new Flee(this);
+
+        AttackEnemy = new AttackEnemy(this);
+        AttackFlagCarrier = new AttackFlagCarrier(this);
+
+        PickUpItem = new PickUpItem(this);
+        StealEnemyFlag = new StealEnemyFlag(this);
+        Heal = new Heal(this);
+
+        ReturnFriendlyFlag = new ReturnFriendlyFlag(this);
+        DefendBase = new DefendBase(this);
+
+        _currentState = GoToEnemyBase; // set default state.
+
+
     }
 
     public void Update()
@@ -51,5 +68,10 @@ public class FiniteStateMachine : MonoBehaviour
         {
             _currentState.Enter(_aiOwner);
         }
+    }
+
+    public override string ToString()
+    {
+        return $"{_currentState.ToString()}";
     }
 }
