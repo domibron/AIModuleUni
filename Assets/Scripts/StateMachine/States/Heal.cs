@@ -56,15 +56,21 @@ public class Heal : StateBase
         // if there are enemies and we have health we can attack or run away if not.
         if (entity.AgentSenses.GetEnemiesInView().Count > 0)
         {
-            if (_hasHealItem)
-            {
-                _owningFSM.ChangeState(_owningFSM.AttackEnemy);
-            }
-            else
-            {
-                _owningFSM.ChangeState(_owningFSM.Flee);
-            }
 
+            _owningFSM.ChangeState(_owningFSM.AttackEnemy);
+            return;
+        }
+
+        // go back to what we were doing
+        if (Vector3.Distance(entity.transform.position, entity.AgentData.EnemyBase.transform.position) <
+                Vector3.Distance(entity.transform.position, entity.AgentData.FriendlyBase.transform.position))
+        {
+            _owningFSM.ChangeState(_owningFSM.GoToEnemyBase);
+            return;
+        }
+        else
+        {
+            _owningFSM.ChangeState(_owningFSM.GoToBase);
             return;
         }
 
