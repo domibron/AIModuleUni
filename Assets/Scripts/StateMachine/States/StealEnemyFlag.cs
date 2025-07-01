@@ -22,33 +22,32 @@ public class StealEnemyFlag : StateBase
 
     public override void Execute(AI entity)
     {
+        // if we see any enemies and they have a flag, we attack them.    
+        if (_enemyFlag == null && entity.AgentSenses.GetEnemiesInView().Count > 0)
+        {
+            foreach (var enemy in entity.AgentSenses.GetEnemiesInView())
+            {
+                if (enemy.GetComponent<AgentData>().HasFriendlyFlag || enemy.GetComponent<AgentData>().HasEnemyFlag)
+                {
+                    _owningFSM.ChangeState(_owningFSM.AttackFlagCarrier);
+                    return;
+                }
+            }
+        }
+
         // if we cannot see the flag and its not in our inventory, then go back to base.
         if (_enemyFlag == null && !entity.AgentData.HasEnemyFlag)
         {
             _owningFSM.ChangeState(_owningFSM.GoToBase);
             return;
         }
-        // if an enemy doesn't have the flag, and we don't and the flag is not at our base, then go get it.
-        else if (_enemyFlag.transform.parent == null && !entity.AgentData.HasEnemyFlag && Vector3.Distance(_enemyFlag.transform.position, entity.AgentData.FriendlyBase.transform.position) > AI.MinDistanceToBase)
+        // if we don't have the flag and the enemy's flag is not at our base, then go get it.
+        else if (!entity.AgentData.HasEnemyFlag && Vector3.Distance(_enemyFlag.transform.position, entity.AgentData.FriendlyBase.transform.position) > AI.MinDistanceToBase)
         {
             // go get the flag
             entity.AgentActions.MoveTo(_enemyFlag);
             entity.AgentActions.CollectItem(_enemyFlag);
 
-        }
-        // if an enemy has the flag go attack them. if not, go back to our base.
-        else if (_enemyFlag.transform.parent != null && !entity.AgentData.HasEnemyFlag)
-        {
-            if (_enemyFlag.transform.parent.gameObject.tag == entity.AgentData.EnemyTeamTag)
-            {
-                _owningFSM.ChangeState(_owningFSM.AttackFlagCarrier);
-                return;
-            }
-            else
-            {
-                _owningFSM.ChangeState(_owningFSM.GoToBase);
-                return;
-            }
         }
 
         // Do we have the flag, then we go return it to base and defend.

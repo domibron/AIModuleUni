@@ -47,15 +47,6 @@ public class GoToBase : StateBase
                 _owningFSM.ChangeState(_owningFSM.ReturnFriendlyFlag);
             }
         }
-        // does an enemy have our flag, then get it back.
-        else if (friendlyFlag?.transform.parent != null)
-        {
-            if (friendlyFlag.transform.parent.gameObject.tag == entity.AgentData.EnemyTeamTag)
-            {
-                _owningFSM.ChangeState(_owningFSM.AttackFlagCarrier);
-                return;
-            }
-        }
         // if the flag is there but not at our base, then move it back.
         else if (Vector3.Distance(friendlyFlag.transform.position, entity.AgentData.FriendlyBase.transform.position) > AI.MinDistanceToBase)
         {
@@ -66,24 +57,26 @@ public class GoToBase : StateBase
         GameObject enemyFlag = entity.AgentSenses.GetEnemyFlagInView();
 
         // if the flag is there and not in our base, go get it.
-        if (enemyFlag != null && enemyFlag.transform.parent == null && Vector3.Distance(enemyFlag.transform.position, entity.AgentData.FriendlyBase.transform.position) > AI.MinDistanceToBase)
+        if (enemyFlag != null && Vector3.Distance(enemyFlag.transform.position, entity.AgentData.FriendlyBase.transform.position) > AI.MinDistanceToBase)
         {
             _owningFSM.ChangeState(_owningFSM.StealEnemyFlag);
             return;
-        }
-        // if someone has the flag, go attack them.
-        else if (enemyFlag != null && enemyFlag.transform.parent != null)
-        {
-            if (enemyFlag.transform.parent.gameObject.tag == entity.AgentData.EnemyTeamTag)
-            {
-                _owningFSM.ChangeState(_owningFSM.AttackFlagCarrier);
-                return;
-            }
         }
 
         // are the enemies, then go attack them.
         if (entity.AgentSenses.GetEnemiesInView().Count > 0)
         {
+            // do any of them have a flag. if so we attack the flag carrier.
+            foreach (var enemy in entity.AgentSenses.GetEnemiesInView())
+            {
+                if (enemy.GetComponent<AgentData>().HasFriendlyFlag || enemy.GetComponent<AgentData>().HasEnemyFlag)
+                {
+                    _owningFSM.ChangeState(_owningFSM.AttackFlagCarrier);
+                    return;
+                }
+            }
+
+            // otherwise we attack the closest one.
             if (Vector3.Distance(entity.AgentSenses.GetNearestEnemyInView().transform.position, entity.transform.position) <= AI.MaxRangeToAttackEnemy)
             {
                 _owningFSM.ChangeState(_owningFSM.AttackEnemy);

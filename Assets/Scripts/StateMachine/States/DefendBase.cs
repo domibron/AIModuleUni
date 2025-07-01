@@ -36,15 +36,6 @@ public class DefendBase : StateBase
                 return;
             }
         }
-        // if someone is taking our flag, go attack them.
-        else if (friendlyFlag?.transform.parent != null) // does some one have our flag
-        {
-            if (friendlyFlag.transform.parent.gameObject.tag == entity.AgentData.EnemyTeamTag)
-            {
-                _owningFSM.ChangeState(_owningFSM.AttackFlagCarrier);
-                return;
-            }
-        }
         // If our flag is outside our base, then return it (in case flag was dropped outside).
         else if (Vector3.Distance(friendlyFlag.transform.position, entity.AgentData.FriendlyBase.transform.position) > AI.MinDistanceToBase)
         {
@@ -52,22 +43,18 @@ public class DefendBase : StateBase
             return;
         }
 
-        // check to see if we can see the enemy flag.
-        GameObject enemyFlag = entity.AgentSenses.GetEnemyFlagInView();
-
-        // if the flag is not there and enemy has it, then go attack them.
-        if (enemyFlag != null && enemyFlag.transform.parent != null)
-        {
-            if (enemyFlag.transform.parent.gameObject.tag == entity.AgentData.EnemyTeamTag)
-            {
-                _owningFSM.ChangeState(_owningFSM.AttackFlagCarrier);
-                return;
-            }
-        }
-
         // if there are enemies, then we attack.
         if (entity.AgentSenses.GetEnemiesInView().Count > 0)
         {
+            foreach (var enemy in entity.AgentSenses.GetEnemiesInView())
+            {
+                if (enemy.GetComponent<AgentData>().HasFriendlyFlag || enemy.GetComponent<AgentData>().HasEnemyFlag)
+                {
+                    _owningFSM.ChangeState(_owningFSM.AttackFlagCarrier);
+                    return;
+                }
+            }
+
             if (Vector3.Distance(entity.AgentSenses.GetNearestEnemyInView().transform.position, entity.transform.position) <= AI.MaxRangeToAttackEnemy)
             {
                 _owningFSM.ChangeState(_owningFSM.AttackEnemy);

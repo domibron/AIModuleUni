@@ -47,27 +47,18 @@ public class GoToEnemyBase : StateBase
                 return;
             }
         }
-        // does an enemy have our flag, go get it back.
-        else if (friendlyFlag?.transform.parent != null)
-        {
-            if (friendlyFlag.transform.parent.gameObject.tag == entity.AgentData.EnemyTeamTag)
-            {
-                _owningFSM.ChangeState(_owningFSM.AttackFlagCarrier);
-                return;
-            }
-        }
 
         // see if we can see our flag.
         GameObject enemyFlag = entity.AgentSenses.GetEnemyFlagInView();
 
         // can we see the enemy flag and no one has it, go steal it.
-        if (enemyFlag != null && enemyFlag.transform.parent == null)
+        if (enemyFlag != null)
         {
             _owningFSM.ChangeState(_owningFSM.StealEnemyFlag);
             return;
         }
         // if an enemy has the flag, go attack them.
-        else if (enemyFlag != null && enemyFlag.transform.parent != null)
+        else if (enemyFlag != null)
         {
             if (enemyFlag.transform.parent.gameObject.tag == entity.AgentData.EnemyTeamTag)
             {
@@ -79,6 +70,17 @@ public class GoToEnemyBase : StateBase
         // if there are enemies, go attack them.
         if (entity.AgentSenses.GetEnemiesInView().Count > 0)
         {
+            // do any of them have a flag. if so we attack the flag carrier.
+            foreach (var enemy in entity.AgentSenses.GetEnemiesInView())
+            {
+                if (enemy.GetComponent<AgentData>().HasFriendlyFlag || enemy.GetComponent<AgentData>().HasEnemyFlag)
+                {
+                    _owningFSM.ChangeState(_owningFSM.AttackFlagCarrier);
+                    return;
+                }
+            }
+
+            // otherwise we just attack the closest one.
             if (Vector3.Distance(entity.AgentSenses.GetNearestEnemyInView().transform.position, entity.transform.position) <= AI.MaxRangeToAttackEnemy)
             {
                 _owningFSM.ChangeState(_owningFSM.AttackEnemy);

@@ -18,21 +18,27 @@ public class AttackEnemy : StateBase
         // our target to kill.
         _targetEnemy = entity.AgentSenses.GetNearestEnemyInView();
 
-
-        // hope this works. check if any enemy has flag lose-ly. (it does not as flag is hidden :c)
-        if (entity.AgentSenses.GetFriendlyFlagInView()?.transform.parent != null)
+        if (_targetEnemy == null)
         {
-            if (entity.AgentSenses.GetFriendlyFlagInView()?.transform.parent.tag == entity.AgentData.EnemyTeamTag)
+            if (Vector3.Distance(entity.transform.position, entity.AgentData.EnemyBase.transform.position) <
+                    Vector3.Distance(entity.transform.position, entity.AgentData.FriendlyBase.transform.position))
             {
-                _owningFSM.ChangeState(_owningFSM.AttackFlagCarrier);
+                _owningFSM.ChangeState(_owningFSM.GoToEnemyBase);
+                return;
+            }
+            else
+            {
+                _owningFSM.ChangeState(_owningFSM.GoToBase);
+                return;
             }
         }
-        else if (entity.AgentSenses.GetEnemyFlagInView()?.transform.parent != null)
+
+        // check if the enemy has either flag and switch to that respected state.
+        if (_targetEnemy.GetComponent<AgentData>().HasFriendlyFlag || _targetEnemy.GetComponent<AgentData>().HasEnemyFlag)
         {
-            if (entity.AgentSenses.GetEnemyFlagInView()?.transform.parent.tag == entity.AgentData.EnemyTeamTag)
-            {
-                _owningFSM.ChangeState(_owningFSM.AttackFlagCarrier);
-            }
+
+            _owningFSM.ChangeState(_owningFSM.AttackFlagCarrier);
+
         }
     }
 
@@ -62,6 +68,14 @@ public class AttackEnemy : StateBase
         }
         else
         {
+            if (_targetEnemy.GetComponent<AgentData>().HasFriendlyFlag || _targetEnemy.GetComponent<AgentData>().HasEnemyFlag)
+            {
+
+                _owningFSM.ChangeState(_owningFSM.AttackFlagCarrier);
+                return;
+
+            }
+
             // Use a power up if we have one.
             if (entity.AgentInventory.HasItem(Names.PowerUp))
             {

@@ -35,6 +35,19 @@ public class ReturnFriendlyFlag : StateBase
         // check if we can see the flag.
         _friendlyFlag = entity.AgentSenses.GetFriendlyFlagInView();
 
+        // check to see if the enemy has our flag and seek them.
+        if (_friendlyFlag == null && entity.AgentSenses.GetEnemiesInView().Count > 0)
+        {
+            foreach (var enemy in entity.AgentSenses.GetEnemiesInView())
+            {
+                if (enemy.GetComponent<AgentData>().HasFriendlyFlag || enemy.GetComponent<AgentData>().HasEnemyFlag)
+                {
+                    _owningFSM.ChangeState(_owningFSM.AttackFlagCarrier);
+                    return;
+                }
+            }
+        }
+
         // We go to the base to search it.
         if (!_checkedBase && _friendlyFlag == null && !entity.AgentData.HasFriendlyFlag)
         {
@@ -65,20 +78,6 @@ public class ReturnFriendlyFlag : StateBase
         // if we can see the flag we attack the owner if its an enemy, go home if its a friendly or go get the flag. 
         if (_friendlyFlag != null && !entity.AgentData.HasFriendlyFlag)
         {
-            if (_friendlyFlag.transform.parent != null)
-            {
-                if (_friendlyFlag.transform.parent.tag == entity.AgentData.EnemyTeamTag)
-                {
-                    _owningFSM.ChangeState(_owningFSM.AttackFlagCarrier);
-                    return;
-                }
-                else
-                {
-                    _owningFSM.ChangeState(_owningFSM.GoToBase);
-                    return;
-                }
-            }
-
             entity.AgentActions.MoveTo(_friendlyFlag);
             entity.AgentActions.CollectItem(_friendlyFlag);
         }

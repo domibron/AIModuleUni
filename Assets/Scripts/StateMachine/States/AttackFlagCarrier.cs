@@ -20,28 +20,16 @@ public class AttackFlagCarrier : StateBase
 
     public override void Enter(AI entity)
     {
-        // get the flags we can see.
-        GameObject friendlyFlag = entity.AgentSenses.GetFriendlyFlagInView();
-        GameObject enemyFlag = entity.AgentSenses.GetEnemyFlagInView();
-
-        // Friendly flag - then target the carrier.
-        if (friendlyFlag != null && friendlyFlag?.transform.parent != null)
+        if (entity.AgentSenses.GetEnemiesInView().Count > 0)
         {
-            if (friendlyFlag.transform.parent.tag == entity.AgentData.EnemyTeamTag)
+            foreach (var enemy in entity.AgentSenses.GetEnemiesInView())
             {
-                _targetEnemy = friendlyFlag.transform.parent.gameObject;
-                _wasFriendlyFlag = true;
-                return;
-            }
-        }
-        // Enemy flag - then target the carrier.
-        else if (enemyFlag != null && enemyFlag?.transform.parent != null)
-        {
-            if (enemyFlag.transform.parent.tag == entity.AgentData.EnemyTeamTag)
-            {
-                _targetEnemy = enemyFlag.transform.parent.gameObject;
-                _wasFriendlyFlag = false;
-                return;
+                if (enemy.GetComponent<AgentData>().HasFriendlyFlag || enemy.GetComponent<AgentData>().HasEnemyFlag)
+                {
+                    _wasFriendlyFlag = enemy.GetComponent<AgentData>().HasEnemyFlag;
+                    _targetEnemy = enemy;
+                    break;
+                }
             }
         }
     }
